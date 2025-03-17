@@ -1,5 +1,6 @@
 asgiref==3.8.1
 Django==5.1.7
+django-soft-delete==1.0.18
 djangorestframework==3.15.2
 psycopg==3.2.6
 psycopg-binary==3.2.6
