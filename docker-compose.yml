@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    shm_size: 256mb
+    environment:
+      POSTGRES_DB: ujad_db
+      POSTGRES_PASSWORD: abc@123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+
+volumes:
+  pgdata:
