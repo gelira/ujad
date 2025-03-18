@@ -3,8 +3,8 @@ from utils.models import BaseModel
 
 class User(BaseModel):
     email = models.EmailField(unique=True)
-    name = models.CharField(max_length=255)
-    role = models.CharField(max_length=50)
+    name = models.CharField(max_length=255, blank=True)
+    role = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True)
 
 class AuthCode(BaseModel):
