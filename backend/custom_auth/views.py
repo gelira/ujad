@@ -1,6 +1,7 @@
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
+from custom_auth.email import send_auth_code
 
 from .serializers import GenerateAuthCodeSerializer, VerifyAuthCodeSerializer
 from .models import AuthCode, User
@@ -13,6 +14,8 @@ class AuthViewSet(ViewSet):
 
         user = User.get_or_create_by_email(serializer.validated_data['email'])
         auth_code = AuthCode.generate(user)
+
+        send_auth_code(user.email, auth_code.code)
 
         return Response({ 'auth_code_uid': auth_code.uid })
     
