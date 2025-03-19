@@ -3,9 +3,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from custom_auth.email import send_auth_code
-
-from .serializers import GenerateAuthCodeSerializer, VerifyAuthCodeSerializer
+from .email import send_auth_code
+from .authentication import CustomJWTAuthentication
+from .serializers import GenerateAuthCodeSerializer, UserSerializer, VerifyAuthCodeSerializer
 from .models import AuthCode, User
 
 class AuthViewSet(ViewSet):
@@ -15,6 +15,10 @@ class AuthViewSet(ViewSet):
         serializer.is_valid(raise_exception=True)
 
         user = User.get_or_create_by_email(serializer.validated_data['email'])
+
+        if not user.is_active:
+            return Response(status=401)
+
         auth_code = AuthCode.generate(user)
 
         send_auth_code(user.email, auth_code.code)
@@ -34,9 +38,18 @@ class AuthViewSet(ViewSet):
                 code=validated_data['code']
             )
 
+            if not user.is_active:
+                return Response(status=401)
+
             token = AccessToken.for_user(user)
 
             return Response({ 'token': str(token) })
         
         except AuthCode.DoesNotExist:
             return Response(status=401)
+        
+    @action(detail=False, methods=['get'], url_path='info', authentication_classes=[CustomJWTAuthentication])
+    def user_info(self, request):
+        serializer = UserSerializer(request.user)
+
+        return Response(serializer.data)
