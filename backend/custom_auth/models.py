@@ -21,7 +21,7 @@ class User(BaseModel):
         return user
 
 class AuthCode(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     code = models.CharField(max_length=6)
     is_active = models.BooleanField(default=True)
     expired_at = models.DateTimeField()
