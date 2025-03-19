@@ -1,6 +1,8 @@
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
+
 from custom_auth.email import send_auth_code
 
 from .serializers import GenerateAuthCodeSerializer, VerifyAuthCodeSerializer
@@ -32,7 +34,9 @@ class AuthViewSet(ViewSet):
                 code=validated_data['code']
             )
 
-            return Response({ 'user_uid': user.uid })
+            token = AccessToken.for_user(user)
+
+            return Response({ 'token': str(token) })
         
         except AuthCode.DoesNotExist:
             return Response(status=401)
