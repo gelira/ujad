@@ -4,11 +4,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from custom_auth.email import send_mail_async
-from custom_auth.authentication import CustomJWTAuthentication
 from custom_auth.serializers import GenerateAuthCodeSerializer, UserSerializer, VerifyAuthCodeSerializer
 from custom_auth.models import AuthCode, User
 
 class AuthCodeViewSet(ViewSet):
+    authentication_classes = []
+    permission_classes = []
+
     def create(self, request):
         serializer = GenerateAuthCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -52,9 +54,16 @@ class AuthCodeViewSet(ViewSet):
             return Response(status=401)
         
 class UserViewSet(ViewSet):
-    authentication_classes = [CustomJWTAuthentication]
+    @action(detail=False, methods=['get', 'put'], url_path='info')
+    def user_info(self, request):
+        if request.method == 'GET':
+            return Response(UserSerializer(request.user).data)
 
-    def list(self, request):
-        serializer = UserSerializer(request.user)
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        return Response(serializer.data)
+        user = request.user
+        user.name = serializer.validated_data['name']
+        user.save()
+
+        return Response(UserSerializer(user).data)
