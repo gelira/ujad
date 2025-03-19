@@ -131,6 +131,15 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'custom_auth.authentication.CustomJWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'custom_auth.permissions.IsAuthenticatedAndActivePermission',
+    ],
+}
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=8),
     'USER_ID_FIELD': 'uid',
