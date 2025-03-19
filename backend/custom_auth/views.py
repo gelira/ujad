@@ -56,14 +56,13 @@ class AuthCodeViewSet(ViewSet):
 class UserViewSet(ViewSet):
     @action(detail=False, methods=['get', 'put'], url_path='info')
     def user_info(self, request):
-        if request.method == 'GET':
-            return Response(UserSerializer(request.user).data)
-
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
         user = request.user
-        user.name = serializer.validated_data['name']
-        user.save()
+
+        if request.method == 'PUT':
+            serializer = UserSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            user.name = serializer.validated_data['name']
+            user.save()
 
         return Response(UserSerializer(user).data)
