@@ -3,10 +3,10 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .email import send_auth_code
-from .authentication import CustomJWTAuthentication
-from .serializers import GenerateAuthCodeSerializer, UserSerializer, VerifyAuthCodeSerializer
-from .models import AuthCode, User
+from custom_auth.email import send_mail_async
+from custom_auth.authentication import CustomJWTAuthentication
+from custom_auth.serializers import GenerateAuthCodeSerializer, UserSerializer, VerifyAuthCodeSerializer
+from custom_auth.models import AuthCode, User
 
 class AuthViewSet(ViewSet):
     @action(detail=False, methods=['post'], url_path='generate')
@@ -21,7 +21,11 @@ class AuthViewSet(ViewSet):
 
         auth_code = AuthCode.generate(user)
 
-        send_auth_code(user.email, auth_code.code)
+        send_mail_async(
+            'UJAD - Código de autenticação',
+            user.email,
+            f'Seu código de autenticação: {auth_code.code}'
+        )
 
         return Response({ 'auth_code_uid': auth_code.uid })
     

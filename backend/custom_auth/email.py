@@ -1,18 +1,19 @@
-import os
-import smtplib
-from email.mime.text import MIMEText
+import threading
+from django.core.mail import EmailMessage
 
-SENDER = os.getenv('EMAIL_SENDER')
-PASSWORD = os.getenv('EMAIL_PASSWORD')
-SMTP_SERVER = os.getenv('SMTP_SERVER')
-SMTP_PORT = os.getenv('SMTP_PORT')
+class EmailThread(threading.Thread):
+    def __init__(self, subject: str, to: str, body: str, fail_silently=False):
+        super().__init__()
+        self.message = EmailMessage(
+            subject=subject,
+            body=body,
+            from_email=None,
+            to=[to]
+        )
+        self.fail_silently = fail_silently
 
-def send_auth_code(email, code):
-    msg = MIMEText(f'Your authentication code is: {code}')
-    msg['Subject'] = 'Authentication Code'
-    msg['From'] = SENDER
-    msg['To'] = email
+    def run(self):
+        self.message.send(self.fail_silently)
 
-    with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
-        server.login(SENDER, PASSWORD)
-        server.sendmail(SENDER, email, msg.as_string())
+def send_mail_async(subject: str, to: str, body: str, fail_silently=False):
+    EmailThread(subject, to, body, fail_silently).start()
