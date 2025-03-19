@@ -8,9 +8,8 @@ from custom_auth.authentication import CustomJWTAuthentication
 from custom_auth.serializers import GenerateAuthCodeSerializer, UserSerializer, VerifyAuthCodeSerializer
 from custom_auth.models import AuthCode, User
 
-class AuthViewSet(ViewSet):
-    @action(detail=False, methods=['post'], url_path='generate')
-    def generate_auth_code(self, request):
+class AuthCodeViewSet(ViewSet):
+    def create(self, request):
         serializer = GenerateAuthCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -52,8 +51,10 @@ class AuthViewSet(ViewSet):
         except AuthCode.DoesNotExist:
             return Response(status=401)
         
-    @action(detail=False, methods=['get'], url_path='info', authentication_classes=[CustomJWTAuthentication])
-    def user_info(self, request):
+class UserViewSet(ViewSet):
+    authentication_classes = [CustomJWTAuthentication]
+
+    def list(self, request):
         serializer = UserSerializer(request.user)
 
         return Response(serializer.data)

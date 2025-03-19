@@ -21,7 +21,8 @@ from rest_framework.routers import DefaultRouter
 from custom_auth import views
 
 router = DefaultRouter(trailing_slash=False)
-router.register(r'auth', views.AuthViewSet, basename='auth')
+router.register(r'auth-code', views.AuthCodeViewSet, basename='auth-code')
+router.register(r'user', views.UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
