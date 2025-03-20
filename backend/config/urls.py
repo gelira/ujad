@@ -18,11 +18,13 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from custom_auth import views
+from custom_auth import views as custom_auth_views
+from sales import views as sales_views
 
 router = DefaultRouter(trailing_slash=False)
-router.register(r'auth-code', views.AuthCodeViewSet, basename='auth-code')
-router.register(r'user', views.UserViewSet, basename='user')
+router.register(r'auth-code', custom_auth_views.AuthCodeViewSet, basename='auth-code')
+router.register(r'user', custom_auth_views.UserViewSet, basename='user')
+router.register(r'products', sales_views.ProductViewSet, basename='products')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
