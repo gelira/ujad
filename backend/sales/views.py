@@ -42,3 +42,13 @@ class ProductViewSet(ViewSet):
         product.delete()
 
         return Response(status=204)
+
+class WalletViewSet(ViewSet):
+    @action(detail=False, methods=['post'], url_path='purchase')
+    def purchase(self, request):
+        serializer = serializers.PurchaseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        print(serializer.validated_data)
+
+        return Response(status=204)

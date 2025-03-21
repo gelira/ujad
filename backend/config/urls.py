@@ -25,6 +25,7 @@ router = DefaultRouter(trailing_slash=False)
 router.register(r'auth-code', custom_auth_views.AuthCodeViewSet, basename='auth-code')
 router.register(r'user', custom_auth_views.UserViewSet, basename='user')
 router.register(r'products', sales_views.ProductViewSet, basename='products')
+router.register(r'wallet', sales_views.WalletViewSet, basename='wallet')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
