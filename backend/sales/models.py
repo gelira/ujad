@@ -25,6 +25,8 @@ class Product(BaseModel):
             self.quantity = models.F('quantity') + diff
             self.save()
 
+        self.refresh_from_db()
+
 class ProductTicket(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     ticket = models.ForeignKey(Ticket, on_delete=models.PROTECT)

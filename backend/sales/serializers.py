@@ -10,3 +10,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ListProductsSerializer(serializers.Serializer):
     products = serializers.ListField(child=ProductSerializer())
+
+class ProductQuantitySerializer(serializers.Serializer):
+    quantity = serializers.IntegerField()
