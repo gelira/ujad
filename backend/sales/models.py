@@ -1,4 +1,5 @@
 from django.db import models
+from django.db import transaction
 from custom_auth.models import User
 from utils.models import BaseModel
 
@@ -18,6 +19,11 @@ class Product(BaseModel):
     description = models.TextField(blank=True)
     price = models.IntegerField()
     quantity = models.IntegerField(default=0)
+
+    def update_quantity(self, diff):
+        with transaction.atomic():
+            self.quantity = models.F('quantity') + diff
+            self.save()
 
 class ProductTicket(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
