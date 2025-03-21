@@ -31,4 +31,5 @@ class ProductTicket(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     ticket = models.ForeignKey(Ticket, on_delete=models.PROTECT)
     dispatcher = models.ForeignKey(User, on_delete=models.PROTECT)
+    product_price = models.IntegerField()
     consumed = models.BooleanField(default=False)
