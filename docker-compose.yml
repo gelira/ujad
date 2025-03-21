@@ -12,6 +12,8 @@ services:
   adminer:
     image: adminer
     restart: always
+    depends_on:
+      - db
 
 volumes:
   pgdata:
