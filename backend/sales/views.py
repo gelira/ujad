@@ -36,3 +36,9 @@ class ProductViewSet(ViewSet):
         product.update_quantity(serializer.validated_data['quantity'])
 
         return Response(serializers.ProductSerializer(product).data)
+    
+    def destroy(self, request, *args, **kwargs):
+        product = Product.find_by_uid_or_404(kwargs['pk'])
+        product.delete()
+
+        return Response(status=204)
