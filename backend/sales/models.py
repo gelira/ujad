@@ -11,6 +11,7 @@ class Wallet(BaseModel):
 class Ticket(BaseModel):
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT)
     status = models.CharField(max_length=50)
+    payment_method = models.CharField(max_length=50)
     original_value = models.IntegerField()
     remaining_value = models.IntegerField()
 
