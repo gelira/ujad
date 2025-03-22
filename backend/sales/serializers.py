@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from sales.models import Product
+from sales.models import Product, Ticket
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,3 +44,8 @@ class PurchaseSerializer(serializers.Serializer):
             raise serializers.ValidationError('Products is empty')
 
         return attrs
+    
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value']

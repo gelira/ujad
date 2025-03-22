@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from sales import serializers
-from sales.models import Product
+from sales.models import Product, Wallet
 
 class ProductViewSet(ViewSet):
     def list(self, request, *args, **kwargs):
@@ -49,6 +49,9 @@ class WalletViewSet(ViewSet):
         serializer = serializers.PurchaseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        print(serializer.validated_data)
+        ticket = Wallet.process_purchase(
+            request.user,
+            serializer.validated_data['products']
+        )
 
-        return Response(status=204)
+        return Response(serializers.TicketSerializer(ticket).data)
