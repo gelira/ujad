@@ -62,7 +62,7 @@ class TicketViewSet(ViewSet):
 
         result = { 'tickets': [] }
 
-        if wallet:
+        if wallet and wallet.is_active:
             result['tickets'] = serializers.TicketSerializer(wallet.ticket_set.all(), many=True).data
         
         return Response(result)
