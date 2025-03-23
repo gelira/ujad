@@ -77,3 +77,13 @@ class TicketViewSet(ViewSet):
         Ticket.webhook_handler(data['uid'], data['status'])
 
         return Response(status=204)
+    
+    @action(detail=True, methods=['post'], url_path='consume')
+    def consume(self, request, pk=None):
+        serializer = serializers.ConsumeTicketSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        ticket = Ticket.find_by_uid_or_404(pk)
+        ticket.consume(serializer.validated_data['productticket_uid_list'])
+
+        return Response(serializers.TicketSerializer(ticket).data)

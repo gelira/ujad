@@ -89,6 +89,30 @@ class Ticket(BaseModel):
             ticket.status = status
             ticket.save()
 
+    def consume(self, productticket_uid_list):
+        if self.status != 'confirmed':
+            raise exceptions.CantUseTicketException()
+
+        with transaction.atomic():
+            consumed = 0
+
+            for uid in productticket_uid_list:
+                ptk = self.productticket_set.filter(uid=uid, consumed=False).first()
+
+                if not ptk:
+                    continue
+
+                consumed += ptk.product_price
+
+                ptk.consumed = True
+                ptk.save()
+
+            if consumed:
+                self.remaining_value = models.F('remaining_value') - consumed
+                self.save()
+
+        self.refresh_from_db()
+
 class Product(BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)

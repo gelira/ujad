@@ -68,3 +68,10 @@ class TicketSerializer(serializers.ModelSerializer):
 class TicketWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
     status = serializers.ChoiceField(choices=['confirmed', 'canceled'])
+
+class ConsumeTicketSerializer(serializers.Serializer):
+    productticket_uid_list = serializers.ListField(
+        child=serializers.UUIDField(),
+        allow_empty=False,
+        min_length=1
+    )
