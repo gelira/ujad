@@ -64,6 +64,31 @@ class Ticket(BaseModel):
     original_value = models.IntegerField()
     remaining_value = models.IntegerField()
 
+    @classmethod
+    def webhook_handler(cls, uid, status):
+        ticket = get_object_or_404(cls, uid=uid)
+
+        if ticket.status != 'pending':
+            return
+
+        if status == 'confirmed':
+            ticket.status = 'confirmed'
+            ticket.save()
+
+            return
+        
+        with transaction.atomic():
+            product_quantity_dict = {}
+
+            for ptk in ticket.productticket_set.all():
+                product_quantity_dict[ptk.product_id] = product_quantity_dict.get(ptk.product_id, 0) + 1
+
+            for product_id, quantity in product_quantity_dict.items():
+                Product.objects.filter(pk=product_id).update(quantity=models.F('quantity') + quantity)
+
+            ticket.status = status
+            ticket.save()
+
 class Product(BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)

@@ -49,3 +49,7 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value']
+
+class TicketWebhookSerializer(serializers.Serializer):
+    uid = serializers.UUIDField()
+    status = serializers.ChoiceField(choices=['confirmed', 'canceled'])

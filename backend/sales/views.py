@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from sales import serializers
-from sales.models import Product, Wallet
+from sales.models import Product, Wallet, Ticket
 
 class ProductViewSet(ViewSet):
     def list(self, request, *args, **kwargs):
@@ -55,3 +55,15 @@ class WalletViewSet(ViewSet):
         )
 
         return Response(serializers.TicketSerializer(ticket).data)
+
+class TicketViewSet(ViewSet):
+    @action(detail=False, methods=['post'], url_path='webhook')
+    def webhook(self, request):
+        serializer = serializers.TicketWebhookSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        Ticket.webhook_handler(data['uid'], data['status'])
+
+        return Response(status=204)
