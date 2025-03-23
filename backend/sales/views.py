@@ -57,6 +57,16 @@ class WalletViewSet(ViewSet):
         return Response(serializers.TicketSerializer(ticket).data)
 
 class TicketViewSet(ViewSet):
+    def list(self, request):
+        wallet = request.user.wallet_set.filter(is_active=True).first()
+
+        result = { 'tickets': [] }
+
+        if wallet:
+            result['tickets'] = serializers.TicketSerializer(wallet.ticket_set.all(), many=True).data
+        
+        return Response(result)
+
     @action(detail=False, methods=['post'], url_path='webhook')
     def webhook(self, request):
         serializer = serializers.TicketWebhookSerializer(data=request.data)

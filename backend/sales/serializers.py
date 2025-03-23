@@ -46,9 +46,24 @@ class PurchaseSerializer(serializers.Serializer):
         return attrs
     
 class TicketSerializer(serializers.ModelSerializer):
+    products = serializers.SerializerMethodField()
+
+    def get_products(self, instance):
+        return list(
+            map(
+                lambda ptk: {
+                    'uid': str(ptk.uid),
+                    'name': ptk.product.name,
+                    'price': ptk.product_price,
+                    'consumed': ptk.consumed
+                },
+                instance.productticket_set.all()
+            )
+        )
+
     class Meta:
         model = Ticket
-        fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value']
+        fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value', 'products']
 
 class TicketWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
