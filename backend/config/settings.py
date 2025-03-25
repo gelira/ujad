@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'custom_auth',
     'sales',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -147,6 +149,8 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'uid',
     'AUTH_HEADER_TYPES': ['JWT']
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 EMAIL_HOST = os.getenv('SMTP_SERVER')
 
