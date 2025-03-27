@@ -8,12 +8,12 @@ from utils.models import BaseModel
 class Wallet(BaseModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     is_active = models.BooleanField(default=True)
-    tickets_amount = models.IntegerField(default=0)
 
     @classmethod
     def get_or_create_wallet(cls, user):
         wallet, _ = cls.objects.get_or_create(
-            user_id=user.id
+            user_id=user.id,
+            is_active=True
         )
 
         return wallet
@@ -26,12 +26,9 @@ class Wallet(BaseModel):
             if not wallet.is_active:
                 raise exceptions.InactiveWalletException()
 
-            ticket = Ticket.objects.create(
+            order = Order.objects.create(
                 wallet=wallet,
-                status='pending',
-                payment_method='teste',
-                original_value=0,
-                remaining_value=0
+                payment_method='teste'
             )
 
             for p in products:
@@ -41,71 +38,88 @@ class Wallet(BaseModel):
                     raise exceptions.InsufficientProductStockException()
 
                 for _ in range(p['quantity']):
-                    ProductTicket.objects.create(
+                    ProductOrder.objects.create(
                         product=product,
-                        ticket=ticket,
+                        order=order,
                         product_price=product.price
                     )
 
-                ticket.original_value += product.price * p['quantity']
+                order.original_value += product.price * p['quantity']
                 
                 product.quantity = models.F('quantity') - p['quantity']
                 product.save()
 
-            ticket.remaining_value = ticket.original_value
-            ticket.save()
+            order.remaining_value = order.original_value
+            order.save()
             
-            return ticket
+            return order
 
-class Ticket(BaseModel):
-    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT)
-    status = models.CharField(max_length=50)
+class Order(BaseModel):
+    STATUS_PENDING = 'pending'
+    STATUS_CANCELED = 'canceled'
+    STATUS_CONFIRMED = 'confirmed'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, STATUS_PENDING),
+        (STATUS_CANCELED, STATUS_CANCELED),
+        (STATUS_CONFIRMED, STATUS_CONFIRMED),
+    ]
+
+    wallet = models.ForeignKey(
+        Wallet,
+        on_delete=models.PROTECT,
+        related_name='orders'
+    )
+    status = models.CharField(
+        max_length=50,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING
+    )
     payment_method = models.CharField(max_length=50)
-    original_value = models.IntegerField()
-    remaining_value = models.IntegerField()
+    original_value = models.IntegerField(default=0)
+    remaining_value = models.IntegerField(default=0)
 
     @classmethod
     def webhook_handler(cls, uid, status):
-        ticket = get_object_or_404(cls, uid=uid)
+        order = get_object_or_404(cls, uid=uid)
 
-        if ticket.status != 'pending':
+        if order.status != cls.STATUS_PENDING:
             return
 
-        if status == 'confirmed':
-            ticket.status = 'confirmed'
-            ticket.save()
+        if status == cls.STATUS_CONFIRMED:
+            order.status = cls.STATUS_CONFIRMED
+            order.save()
 
             return
         
         with transaction.atomic():
             product_quantity_dict = {}
 
-            for ptk in ticket.productticket_set.all():
-                product_quantity_dict[ptk.product_id] = product_quantity_dict.get(ptk.product_id, 0) + 1
+            for po in order.productorder_set.all():
+                product_quantity_dict[po.product_id] = product_quantity_dict.get(po.product_id, 0) + 1
 
             for product_id, quantity in product_quantity_dict.items():
                 Product.objects.filter(pk=product_id).update(quantity=models.F('quantity') + quantity)
 
-            ticket.status = status
-            ticket.save()
+            order.status = cls.STATUS_CANCELED
+            order.save()
 
-    def consume(self, productticket_uid_list):
-        if self.status != 'confirmed':
+    def consume(self, productorder_uid_list):
+        if self.status != self.STATUS_CONFIRMED:
             raise exceptions.CantUseTicketException()
 
         with transaction.atomic():
             consumed = 0
 
-            for uid in productticket_uid_list:
-                ptk = self.productticket_set.filter(uid=uid, consumed=False).first()
+            for uid in productorder_uid_list:
+                po = self.productorder_set.filter(uid=uid, consumed=False).first()
 
-                if not ptk:
+                if not po:
                     continue
 
-                consumed += ptk.product_price
+                consumed += po.product_price
 
-                ptk.consumed = True
-                ptk.save()
+                po.consumed = True
+                po.save()
 
             if consumed:
                 self.remaining_value = models.F('remaining_value') - consumed
@@ -126,9 +140,9 @@ class Product(BaseModel):
 
         self.refresh_from_db()
 
-class ProductTicket(BaseModel):
+class ProductOrder(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    ticket = models.ForeignKey(Ticket, on_delete=models.PROTECT)
+    order = models.ForeignKey(Order, on_delete=models.PROTECT)
     dispatcher = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     product_price = models.IntegerField()
     consumed = models.BooleanField(default=False)
