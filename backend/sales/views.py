@@ -7,7 +7,7 @@ from sales.models import Product, Wallet, Order, Ticket
 
 class ProductViewSet(ViewSet):
     def list(self, request, *args, **kwargs):
-        products = Product.objects.all()
+        products = Product.objects.order_by('name').all()
         serializer = serializers.ListProductsSerializer({ 'products': products })
 
         return Response(serializer.data)
@@ -19,7 +19,7 @@ class ProductViewSet(ViewSet):
 
         return Response(serializer.data, status=201)
     
-    def update(self, request, *args, **kwargs):
+    def partial_update(self, request, *args, **kwargs):
         product = Product.find_by_uid_or_404(kwargs['pk'])
         serializer = serializers.ProductSerializer(product, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -27,7 +27,7 @@ class ProductViewSet(ViewSet):
 
         return Response(serializer.data)
     
-    @action(detail=True, methods=['put'], url_path='quantity')
+    @action(detail=True, methods=['patch'], url_path='quantity')
     def update_quantity(self, request, pk=None):
         serializer = serializers.ProductQuantitySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
