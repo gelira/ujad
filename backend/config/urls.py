@@ -26,7 +26,7 @@ router.register(r'auth-code', custom_auth_views.AuthCodeViewSet, basename='auth-
 router.register(r'user', custom_auth_views.UserViewSet, basename='user')
 router.register(r'products', sales_views.ProductViewSet, basename='products')
 router.register(r'wallet', sales_views.WalletViewSet, basename='wallet')
-router.register(r'tickets', sales_views.TicketViewSet, basename='tickets')
+router.register(r'orders', sales_views.OrderViewSet, basename='orders')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

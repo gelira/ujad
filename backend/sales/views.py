@@ -44,8 +44,8 @@ class ProductViewSet(ViewSet):
         return Response(status=204)
 
 class WalletViewSet(ViewSet):
-    @action(detail=False, methods=['post'], url_path='purchase')
-    def purchase(self, request):
+    @action(detail=False, methods=['post'], url_path='orders')
+    def orders_action(self, request):
         serializer = serializers.NewOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -56,11 +56,18 @@ class WalletViewSet(ViewSet):
 
         return Response(serializers.OrderSerializer(order).data)
     
-    @action(detail=False, methods=['get'], url_path='products')
-    def list_products(self, request):
-        pass
+    @action(detail=False, methods=['get'], url_path='tickets')
+    def tickets(self, request):
+        wallet = Wallet.get_or_create_wallet(request.user)
+        
+        serializer = serializers.TicketSerializer(
+            wallet.get_products(),
+            many=True
+        )
 
-class TicketViewSet(ViewSet):
+        return Response({ 'tickets': serializer.data })
+
+class OrderViewSet(ViewSet):
     def list(self, request):
         wallet = request.user.wallet_set.filter(is_active=True).first()
 

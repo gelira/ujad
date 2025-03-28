@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from sales.models import Product, Order
+from sales.models import Product, Order, Ticket
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,6 +64,16 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value', 'products']
+
+class TicketSerializer(serializers.ModelSerializer):
+    product_name = serializers.SerializerMethodField()
+
+    def get_product_name(self, instance):
+        return instance.product.name
+
+    class Meta:
+        model = Ticket
+        fields = ['uid', 'product_name', 'product_price', 'consumed']
 
 class OrderWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
