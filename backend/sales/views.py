@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from sales import serializers
-from sales.models import Product, Wallet, Ticket
+from sales.models import Product, Wallet, Order
 
 class ProductViewSet(ViewSet):
     def list(self, request, *args, **kwargs):
@@ -46,7 +46,7 @@ class ProductViewSet(ViewSet):
 class WalletViewSet(ViewSet):
     @action(detail=False, methods=['post'], url_path='purchase')
     def purchase(self, request):
-        serializer = serializers.PurchaseSerializer(data=request.data)
+        serializer = serializers.NewOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         ticket = Wallet.process_purchase(
@@ -54,7 +54,7 @@ class WalletViewSet(ViewSet):
             serializer.validated_data['products']
         )
 
-        return Response(serializers.TicketSerializer(ticket).data)
+        return Response(serializers.OrderSerializer(ticket).data)
 
 class TicketViewSet(ViewSet):
     def list(self, request):
@@ -63,27 +63,27 @@ class TicketViewSet(ViewSet):
         result = { 'tickets': [] }
 
         if wallet and wallet.is_active:
-            result['tickets'] = serializers.TicketSerializer(wallet.ticket_set.all(), many=True).data
+            result['tickets'] = serializers.OrderSerializer(wallet.ticket_set.all(), many=True).data
         
         return Response(result)
 
     @action(detail=False, methods=['post'], url_path='webhook')
     def webhook(self, request):
-        serializer = serializers.TicketWebhookSerializer(data=request.data)
+        serializer = serializers.OrderWebhookSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
 
-        Ticket.webhook_handler(data['uid'], data['status'])
+        Order.webhook_handler(data['uid'], data['status'])
 
         return Response(status=204)
     
     @action(detail=True, methods=['post'], url_path='consume')
     def consume(self, request, pk=None):
-        serializer = serializers.ConsumeTicketSerializer(data=request.data)
+        serializer = serializers.ConsumeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        ticket = Ticket.find_by_uid_or_404(pk)
-        ticket.consume(serializer.validated_data['productticket_uid_list'])
+        ticket = Order.find_by_uid_or_404(pk)
+        ticket.consume(serializer.validated_data['productorder_uid_list'])
 
-        return Response(serializers.TicketSerializer(ticket).data)
+        return Response(serializers.OrderSerializer(ticket).data)

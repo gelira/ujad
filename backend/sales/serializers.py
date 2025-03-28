@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from sales.models import Product, Ticket
+from sales.models import Product, Order
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,13 +14,13 @@ class ListProductsSerializer(serializers.Serializer):
 class ProductQuantitySerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
-class ProductForPurchaseSerializer(serializers.Serializer):
+class ProductForNewOrderSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
     quantity = serializers.IntegerField()
 
-class PurchaseSerializer(serializers.Serializer):
+class NewOrderSerializer(serializers.Serializer):
     products = serializers.ListField(
-        child=ProductForPurchaseSerializer(),
+        child=ProductForNewOrderSerializer(),
         allow_empty=False,
         min_length=1
     )
@@ -45,32 +45,32 @@ class PurchaseSerializer(serializers.Serializer):
 
         return attrs
     
-class TicketSerializer(serializers.ModelSerializer):
+class OrderSerializer(serializers.ModelSerializer):
     products = serializers.SerializerMethodField()
 
     def get_products(self, instance):
         return list(
             map(
-                lambda ptk: {
-                    'uid': str(ptk.uid),
-                    'name': ptk.product.name,
-                    'price': ptk.product_price,
-                    'consumed': ptk.consumed
+                lambda po: {
+                    'uid': str(po.uid),
+                    'name': po.product.name,
+                    'price': po.product_price,
+                    'consumed': po.consumed
                 },
-                instance.productticket_set.all()
+                instance.productorder_set.all()
             )
         )
 
     class Meta:
-        model = Ticket
+        model = Order
         fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value', 'products']
 
-class TicketWebhookSerializer(serializers.Serializer):
+class OrderWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
-    status = serializers.ChoiceField(choices=['confirmed', 'canceled'])
+    status = serializers.ChoiceField(choices=[Order.STATUS_CONFIRMED, Order.STATUS_CANCELED])
 
-class ConsumeTicketSerializer(serializers.Serializer):
-    productticket_uid_list = serializers.ListField(
+class ConsumeSerializer(serializers.Serializer):
+    productorder_uid_list = serializers.ListField(
         child=serializers.UUIDField(),
         allow_empty=False,
         min_length=1
