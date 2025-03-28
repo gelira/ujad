@@ -49,12 +49,16 @@ class WalletViewSet(ViewSet):
         serializer = serializers.NewOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        ticket = Wallet.process_purchase(
+        order = Wallet.process_new_order(
             request.user,
             serializer.validated_data['products']
         )
 
-        return Response(serializers.OrderSerializer(ticket).data)
+        return Response(serializers.OrderSerializer(order).data)
+    
+    @action(detail=False, methods=['get'], url_path='products')
+    def list_products(self, request):
+        pass
 
 class TicketViewSet(ViewSet):
     def list(self, request):

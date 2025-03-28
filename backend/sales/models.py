@@ -19,7 +19,7 @@ class Wallet(BaseModel):
         return wallet
     
     @classmethod
-    def process_purchase(cls, user, products):
+    def process_new_order(cls, user, products):
         with transaction.atomic():
             wallet = cls.get_or_create_wallet(user)
 
