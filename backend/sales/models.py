@@ -38,7 +38,7 @@ class Wallet(BaseModel):
                     raise exceptions.InsufficientProductStockException()
 
                 for _ in range(p['quantity']):
-                    ProductOrder.objects.create(
+                    Ticket.objects.create(
                         product=product,
                         order=order,
                         product_price=product.price
@@ -53,6 +53,15 @@ class Wallet(BaseModel):
             order.save()
             
             return order
+
+    def get_tickets(self, all=False):
+        qs = Ticket.objects.filter(order__wallet_id=self.id)
+
+        if not all:
+            qs = qs.filter(consumed=False)
+
+        return qs.prefetch_related('product')
+
 
 class Order(BaseModel):
     STATUS_PENDING = 'pending'
@@ -140,7 +149,7 @@ class Product(BaseModel):
 
         self.refresh_from_db()
 
-class ProductOrder(BaseModel):
+class Ticket(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     dispatcher = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
