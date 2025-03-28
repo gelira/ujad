@@ -62,7 +62,6 @@ class Wallet(BaseModel):
 
         return qs.prefetch_related('product')
 
-
 class Order(BaseModel):
     STATUS_PENDING = 'pending'
     STATUS_CANCELED = 'canceled'
@@ -112,30 +111,6 @@ class Order(BaseModel):
             order.status = cls.STATUS_CANCELED
             order.save()
 
-    def consume(self, productorder_uid_list):
-        if self.status != self.STATUS_CONFIRMED:
-            raise exceptions.CantUseTicketException()
-
-        with transaction.atomic():
-            consumed = 0
-
-            for uid in productorder_uid_list:
-                po = self.productorder_set.filter(uid=uid, consumed=False).first()
-
-                if not po:
-                    continue
-
-                consumed += po.product_price
-
-                po.consumed = True
-                po.save()
-
-            if consumed:
-                self.remaining_value = models.F('remaining_value') - consumed
-                self.save()
-
-        self.refresh_from_db()
-
 class Product(BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -155,3 +130,36 @@ class Ticket(BaseModel):
     dispatcher = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     product_price = models.IntegerField()
     consumed = models.BooleanField(default=False)
+
+    @classmethod
+    def consume(cls, wallet, ticket_uid_list):
+        tickets_consumed = []
+
+        with transaction.atomic():
+            orders_consuming = {}
+
+            for uid in ticket_uid_list:
+                ticket = cls.objects.filter(
+                    uid=uid,
+                    consumed=False,
+                    order__wallet_id=wallet.id,
+                    order__status=Order.STATUS_CONFIRMED
+                ).first()
+
+                if not ticket:
+                    continue
+
+                orders_consuming[ticket.order_id] = \
+                    orders_consuming.get(ticket.order_id, 0) + ticket.product_price
+
+                ticket.consumed = True
+                ticket.save()
+
+                tickets_consumed.append(str(ticket.uid))
+
+            for order_id, consumed in orders_consuming.items():
+                Order.objects.filter(pk=order_id).update(
+                    remaining_value=models.F('remaining_value') - consumed
+                )
+
+        return tickets_consumed

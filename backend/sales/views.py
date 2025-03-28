@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from sales import serializers
-from sales.models import Product, Wallet, Order
+from sales.models import Product, Wallet, Order, Ticket
 
 class ProductViewSet(ViewSet):
     def list(self, request, *args, **kwargs):
@@ -66,6 +66,24 @@ class WalletViewSet(ViewSet):
         )
 
         return Response({ 'tickets': serializer.data })
+    
+    @action(detail=True, methods=['get', 'post'], url_path='consume')
+    def consume(self, request, pk=None):
+        wallet = Wallet.find_by_uid_or_404(pk)
+
+        result = { 'tickets': None }
+
+        if request.method == 'get':
+            result['tickets'] = \
+                serializers.TicketSerializer(wallet.get_products(), many=True).data
+        
+        else:
+            serializer = serializers.ConsumeSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            result['tickets'] = Ticket.consume(serializer.validated_data['tickets'])
+
+        return Response(result)
 
 class OrderViewSet(ViewSet):
     def list(self, request):
@@ -88,13 +106,3 @@ class OrderViewSet(ViewSet):
         Order.webhook_handler(data['uid'], data['status'])
 
         return Response(status=204)
-    
-    @action(detail=True, methods=['post'], url_path='consume')
-    def consume(self, request, pk=None):
-        serializer = serializers.ConsumeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        ticket = Order.find_by_uid_or_404(pk)
-        ticket.consume(serializer.validated_data['productorder_uid_list'])
-
-        return Response(serializers.OrderSerializer(ticket).data)

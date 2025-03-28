@@ -44,26 +44,6 @@ class NewOrderSerializer(serializers.Serializer):
             raise serializers.ValidationError('Products is empty')
 
         return attrs
-    
-class OrderSerializer(serializers.ModelSerializer):
-    products = serializers.SerializerMethodField()
-
-    def get_products(self, instance):
-        return list(
-            map(
-                lambda po: {
-                    'uid': str(po.uid),
-                    'name': po.product.name,
-                    'price': po.product_price,
-                    'consumed': po.consumed
-                },
-                instance.productorder_set.all()
-            )
-        )
-
-    class Meta:
-        model = Order
-        fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value', 'products']
 
 class TicketSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
@@ -75,12 +55,19 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = ['uid', 'product_name', 'product_price', 'consumed']
 
+class OrderSerializer(serializers.ModelSerializer):
+    tickets = TicketSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value', 'tickets']
+
 class OrderWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
     status = serializers.ChoiceField(choices=[Order.STATUS_CONFIRMED, Order.STATUS_CANCELED])
 
 class ConsumeSerializer(serializers.Serializer):
-    productorder_uid_list = serializers.ListField(
+    tickets = serializers.ListField(
         child=serializers.UUIDField(),
         allow_empty=False,
         min_length=1
