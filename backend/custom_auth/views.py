@@ -54,11 +54,11 @@ class AuthCodeViewSet(ViewSet):
             return Response(status=401)
         
 class UserViewSet(ViewSet):
-    @action(detail=False, methods=['get', 'put'], url_path='info')
+    @action(detail=False, methods=['get', 'patch'], url_path='info')
     def user_info(self, request):
         user = request.user
 
-        if request.method == 'PUT':
+        if request.method == 'PATCH':
             serializer = UserSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
