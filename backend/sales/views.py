@@ -61,7 +61,7 @@ class WalletViewSet(ViewSet):
         wallet = Wallet.get_or_create_wallet(request.user)
         
         serializer = serializers.TicketSerializer(
-            wallet.get_products(),
+            wallet.get_tickets(),
             many=True
         )
 
@@ -73,15 +73,15 @@ class WalletViewSet(ViewSet):
 
         result = { 'tickets': None }
 
-        if request.method == 'get':
+        if request.method == 'GET':
             result['tickets'] = \
-                serializers.TicketSerializer(wallet.get_products(), many=True).data
+                serializers.TicketSerializer(wallet.get_tickets(), many=True).data
         
         else:
             serializer = serializers.ConsumeSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            result['tickets'] = Ticket.consume(serializer.validated_data['tickets'])
+            result['tickets'] = Ticket.consume(wallet, serializer.validated_data['tickets'])
 
         return Response(result)
 

@@ -102,7 +102,7 @@ class Order(BaseModel):
         with transaction.atomic():
             product_quantity_dict = {}
 
-            for po in order.productorder_set.all():
+            for po in order.ticket_set.all():
                 product_quantity_dict[po.product_id] = product_quantity_dict.get(po.product_id, 0) + 1
 
             for product_id, quantity in product_quantity_dict.items():
@@ -147,7 +147,7 @@ class Ticket(BaseModel):
                 ).first()
 
                 if not ticket:
-                    continue
+                    raise exceptions.CantUseTicketException()
 
                 orders_consuming[ticket.order_id] = \
                     orders_consuming.get(ticket.order_id, 0) + ticket.product_price
