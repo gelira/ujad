@@ -74,8 +74,7 @@ class Order(BaseModel):
 
     wallet = models.ForeignKey(
         Wallet,
-        on_delete=models.PROTECT,
-        related_name='orders'
+        on_delete=models.PROTECT
     )
     status = models.CharField(
         max_length=50,
@@ -163,3 +162,8 @@ class Ticket(BaseModel):
                 )
 
         return tickets_consumed
+
+class ConsumingToken(BaseModel):
+    wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT)
+    expired_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
