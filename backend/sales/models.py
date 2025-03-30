@@ -1,5 +1,6 @@
-from django.db import models
-from django.db import transaction
+from datetime import timedelta
+from django.db import models, transaction
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from sales import exceptions
 from custom_auth.models import User
@@ -167,3 +168,18 @@ class ConsumingToken(BaseModel):
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT)
     expired_at = models.DateTimeField()
     used = models.BooleanField(default=False)
+
+    @classmethod
+    def get_or_create_consuming_token(cls, wallet):
+        now = timezone.now()
+
+        ct = cls.objects.filter(
+            wallet_id=wallet.id,
+            expired_at__gt=now,
+            used=False
+        ).first()
+
+        return ct or cls.objects.create(
+            wallet=wallet,
+            expired_at=now + timedelta(minutes=40)
+        )

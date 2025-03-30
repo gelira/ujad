@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 
 from custom_auth import permissions
 from sales import serializers
-from sales.models import Product, Wallet, Order, Ticket
+from sales.models import Product, Wallet, Order, Ticket, ConsumingToken
 
 class ProductViewSet(ViewSet):
     permission_classes = [permissions.IsAdminAuthenticatedAndActivePermission]
@@ -53,6 +53,8 @@ class ProductViewSet(ViewSet):
         return super().get_permissions()
 
 class WalletViewSet(ViewSet):
+    permission_classes = [permissions.IsConsumerAuthenticatedAndActivePermission]
+
     @action(detail=False, methods=['post'], url_path='orders')
     def orders_action(self, request):
         serializer = serializers.NewOrderSerializer(data=request.data)
@@ -76,6 +78,14 @@ class WalletViewSet(ViewSet):
 
         return Response({ 'tickets': serializer.data })
     
+    @action(detail=False, methods=['get'], url_path='consuming-token')
+    def generate_consuming_token(self, request):
+        wallet = Wallet.get_or_create_wallet(request.user)
+        
+        ct = ConsumingToken.get_or_create_consuming_token(wallet)
+
+        return Response({ 'consuming_token_uid': str(ct.uid) })
+
     @action(detail=True, methods=['get', 'post'], url_path='consume')
     def consume(self, request, pk=None):
         wallet = Wallet.find_by_uid_or_404(pk)
