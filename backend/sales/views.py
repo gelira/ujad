@@ -2,10 +2,13 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
+from custom_auth import permissions
 from sales import serializers
 from sales.models import Product, Wallet, Order, Ticket
 
 class ProductViewSet(ViewSet):
+    permission_classes = [permissions.IsAdminAuthenticatedAndActivePermission]
+
     def list(self, request, *args, **kwargs):
         products = Product.objects.order_by('name').all()
         serializer = serializers.ListProductsSerializer({ 'products': products })
@@ -42,6 +45,12 @@ class ProductViewSet(ViewSet):
         product.delete()
 
         return Response(status=204)
+    
+    def get_permissions(self):
+        if self.action == 'list':
+            return []
+
+        return super().get_permissions()
 
 class WalletViewSet(ViewSet):
     @action(detail=False, methods=['post'], url_path='orders')

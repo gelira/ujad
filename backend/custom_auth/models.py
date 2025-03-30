@@ -8,6 +8,7 @@ from uuid import UUID
 from custom_auth.exceptions import InvalidAuthCodeException
 
 class User(BaseModel):
+    ROLE_ADMIN = 'admin'
     ROLE_CONSUMER = 'consumer'
     ROLE_DISPATCHER = 'dispatcher'
 
