@@ -5,6 +5,14 @@ declare global {
     email: string
     role: string
   }
+
+  interface Product {
+    uid: string
+    name: string
+    description: string
+    price: number
+    quantity: number
+  }
 }
 
 export { }

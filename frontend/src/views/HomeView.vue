@@ -3,21 +3,21 @@ import { onMounted } from 'vue'
 
 import { useNavigation } from '@/composables/navigation'
 import { useAuthStore } from '@/stores/auth'
+import { useProductStore } from '@/stores/products'
 import { removeToken } from '@/utils/localStorage'
 import AppBar from '@/components/AppBar.vue'
 
 const authStore = useAuthStore()
+const productStore = useProductStore()
 const navigation = useNavigation()
 
 onMounted(() => {
-  (async () => {
-    try {
-      await authStore.getUserInfo()
-    } catch {
+  authStore.getUserInfo()
+    .then(() => productStore.getProducts())
+    .catch(() => {
       removeToken()
-      navigation.goToLogin()  
-    }
-  })()
+      navigation.goToLogin()
+    })
 })
 </script>
 
