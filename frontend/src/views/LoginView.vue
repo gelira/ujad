@@ -10,10 +10,10 @@ const alertStore = useAlertStore()
 const authStore = useAuthStore()
 const navigation = useNavigation()
 
-const email = ref('geraldo.eloi11@gmail.com')
+const email = ref('')
 const code = ref('')
 const loading = ref(false)
-const step = ref<'generate' | 'verify'>('verify')
+const step = ref<'generate' | 'verify'>('generate')
 
 async function generateStep() {
   try {
