@@ -37,21 +37,17 @@ class AuthCodeViewSet(ViewSet):
 
         validated_data = serializer.validated_data
 
-        try:
-            user = AuthCode.verify(
-                uid=validated_data['auth_code_uid'],
-                code=validated_data['code']
-            )
+        user = AuthCode.verify(
+            uid=validated_data['auth_code_uid'],
+            code=validated_data['code']
+        )
 
-            if not user.is_active:
-                return Response(status=401)
-
-            token = AccessToken.for_user(user)
-
-            return Response({ 'token': str(token) })
-        
-        except AuthCode.DoesNotExist:
+        if not user.is_active:
             return Response(status=401)
+
+        token = AccessToken.for_user(user)
+
+        return Response({ 'token': str(token) })
         
 class UserViewSet(ViewSet):
     @action(detail=False, methods=['get', 'patch'], url_path='info')
