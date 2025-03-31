@@ -136,39 +136,6 @@ class Ticket(BaseModel):
     product_price = models.IntegerField()
     consumed = models.BooleanField(default=False)
 
-    @classmethod
-    def consume(cls, wallet, ticket_uid_list):
-        tickets_consumed = []
-
-        with transaction.atomic():
-            orders_consuming = {}
-
-            for uid in ticket_uid_list:
-                ticket = cls.objects.filter(
-                    uid=uid,
-                    consumed=False,
-                    order__wallet_id=wallet.id,
-                    order__status=Order.STATUS_CONFIRMED
-                ).first()
-
-                if not ticket:
-                    raise exceptions.CantUseTicketException()
-
-                orders_consuming[ticket.order_id] = \
-                    orders_consuming.get(ticket.order_id, 0) + ticket.product_price
-
-                ticket.consumed = True
-                ticket.save()
-
-                tickets_consumed.append(str(ticket.uid))
-
-            for order_id, consumed in orders_consuming.items():
-                Order.objects.filter(pk=order_id).update(
-                    remaining_value=models.F('remaining_value') - consumed
-                )
-
-        return tickets_consumed
-
 class ConsumingToken(BaseModel):
     wallet = models.ForeignKey(Wallet, on_delete=models.PROTECT)
     expired_at = models.DateTimeField()
@@ -202,4 +169,37 @@ class ConsumingToken(BaseModel):
         
         except Exception:
             raise NotFound()
+
+    def consume(self, dispatcher, ticket_uid_list):
+        tickets_consumed = []
+
+        with transaction.atomic():
+            orders_consuming = {}
+
+            for uid in ticket_uid_list:
+                ticket = Ticket.objects.filter(
+                    uid=uid,
+                    consumed=False,
+                    order__wallet_id=self.wallet_id,
+                    order__status=Order.STATUS_CONFIRMED
+                ).first()
+
+                if not ticket:
+                    raise exceptions.CantUseTicketException()
+
+                orders_consuming[ticket.order_id] = \
+                    orders_consuming.get(ticket.order_id, 0) + ticket.product_price
+
+                ticket.consumed = True
+                ticket.dispatcher = dispatcher
+                ticket.save()
+
+                tickets_consumed.append(str(ticket.uid))
+
+            for order_id, consumed in orders_consuming.items():
+                Order.objects.filter(pk=order_id).update(
+                    remaining_value=models.F('remaining_value') - consumed
+                )
+
+        return tickets_consumed
 

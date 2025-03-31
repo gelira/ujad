@@ -86,27 +86,36 @@ class WalletViewSet(ViewSet):
 
         return Response({ 'consuming_token_uid': str(ct.uid) })
 
-    @action(detail=False, methods=['get', 'post'], url_path='consume', permission_classes=[])
+    @action(detail=False, methods=['get', 'post'], url_path='consume')
     def consume(self, request):
         ct_uid = request.query_params.get('consuming_token_uid')
 
         ct = models.ConsumingToken.find_by_uid_or_404(ct_uid)
 
-        wallet = ct.wallet
-
         result = { 'tickets': None }
 
         if request.method == 'GET':
-            result['tickets'] = \
-                serializers.TicketSerializer(wallet.get_tickets(), many=True).data
+            result['tickets'] = serializers.TicketSerializer(
+                ct.wallet.get_tickets(),
+                many=True
+            ).data
         
         else:
             serializer = serializers.ConsumeSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            result['tickets'] = Ticket.consume(wallet, serializer.validated_data['tickets'])
+            result['tickets'] = ct.consume(
+                request.user,
+                serializer.validated_data['tickets']
+            )
 
         return Response(result)
+    
+    def get_permissions(self):
+        if self.action == 'consume':
+            return [permissions.IsDispatcherAuthenticatedAndActivePermission()]
+
+        return super().get_permissions()
 
 class OrderViewSet(ViewSet):
     def list(self, request):
