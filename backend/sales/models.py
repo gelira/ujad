@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 from django.db import models, transaction
 from django.utils import timezone
@@ -5,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from sales import exceptions
 from custom_auth.models import User
 from utils.models import BaseModel
+from rest_framework.exceptions import NotFound
 
 class Wallet(BaseModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -56,7 +58,10 @@ class Wallet(BaseModel):
             return order
 
     def get_tickets(self, all=False):
-        qs = Ticket.objects.filter(order__wallet_id=self.id)
+        qs = Ticket.objects.filter(
+            order__wallet_id=self.id,
+            order__status=Order.STATUS_CONFIRMED
+        )
 
         if not all:
             qs = qs.filter(consumed=False)
@@ -183,3 +188,18 @@ class ConsumingToken(BaseModel):
             wallet=wallet,
             expired_at=now + timedelta(minutes=40)
         )
+    
+    @classmethod
+    def find_by_uid_or_404(cls, uid):
+        try:
+            validated_uid = uuid.UUID(uid)
+            
+            return cls.objects.get(
+                uid=validated_uid,
+                expired_at__gt=timezone.now(),
+                used=False
+            )
+        
+        except Exception:
+            raise NotFound()
+

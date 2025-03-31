@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from custom_auth import permissions
-from sales import serializers
+from sales import serializers, models
 from sales.models import Product, Wallet, Order, Ticket, ConsumingToken
 
 class ProductViewSet(ViewSet):
@@ -86,9 +86,13 @@ class WalletViewSet(ViewSet):
 
         return Response({ 'consuming_token_uid': str(ct.uid) })
 
-    @action(detail=True, methods=['get', 'post'], url_path='consume')
-    def consume(self, request, pk=None):
-        wallet = Wallet.find_by_uid_or_404(pk)
+    @action(detail=False, methods=['get', 'post'], url_path='consume', permission_classes=[])
+    def consume(self, request):
+        ct_uid = request.query_params.get('consuming_token_uid')
+
+        ct = models.ConsumingToken.find_by_uid_or_404(ct_uid)
+
+        wallet = ct.wallet
 
         result = { 'tickets': None }
 
