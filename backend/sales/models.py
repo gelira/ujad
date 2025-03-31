@@ -201,5 +201,8 @@ class ConsumingToken(BaseModel):
                     remaining_value=models.F('remaining_value') - consumed
                 )
 
+            self.used = True
+            self.save()
+
         return tickets_consumed
 

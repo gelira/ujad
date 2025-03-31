@@ -69,10 +69,12 @@ class WalletViewSet(ViewSet):
     
     @action(detail=False, methods=['get'], url_path='tickets')
     def tickets(self, request):
+        all = bool(request.query_params.get('all'))
+
         wallet = Wallet.get_or_create_wallet(request.user)
         
         serializer = serializers.TicketSerializer(
-            wallet.get_tickets(),
+            wallet.get_tickets(all),
             many=True
         )
 
