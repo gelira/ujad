@@ -4,13 +4,12 @@ from rest_framework.decorators import action
 
 from custom_auth import permissions
 from sales import serializers, models
-from sales.models import Product, Wallet, Order, Ticket, ConsumingToken
 
 class ProductViewSet(ViewSet):
     permission_classes = [permissions.IsAdminAuthenticatedAndActivePermission]
 
     def list(self, request, *args, **kwargs):
-        products = Product.objects.order_by('name').all()
+        products = models.Product.objects.order_by('name').all()
         serializer = serializers.ListProductsSerializer({ 'products': products })
 
         return Response(serializer.data)
@@ -23,7 +22,7 @@ class ProductViewSet(ViewSet):
         return Response(serializer.data, status=201)
     
     def partial_update(self, request, *args, **kwargs):
-        product = Product.find_by_uid_or_404(kwargs['pk'])
+        product = models.Product.find_by_uid_or_404(kwargs['pk'])
         serializer = serializers.ProductSerializer(product, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -35,13 +34,13 @@ class ProductViewSet(ViewSet):
         serializer = serializers.ProductQuantitySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        product = Product.find_by_uid_or_404(pk)
+        product = models.Product.find_by_uid_or_404(pk)
         product.update_quantity(serializer.validated_data['quantity'])
 
         return Response(serializers.ProductSerializer(product).data)
     
     def destroy(self, request, *args, **kwargs):
-        product = Product.find_by_uid_or_404(kwargs['pk'])
+        product = models.Product.find_by_uid_or_404(kwargs['pk'])
         product.delete()
 
         return Response(status=204)
@@ -60,7 +59,7 @@ class WalletViewSet(ViewSet):
         serializer = serializers.NewOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        order = Wallet.process_new_order(
+        order = models.Wallet.process_new_order(
             request.user,
             serializer.validated_data['products']
         )
@@ -71,7 +70,7 @@ class WalletViewSet(ViewSet):
     def tickets(self, request):
         all = bool(request.query_params.get('all'))
 
-        wallet = Wallet.get_or_create_wallet(request.user)
+        wallet = models.Wallet.get_or_create_wallet(request.user)
         
         serializer = serializers.TicketSerializer(
             wallet.get_tickets(all),
@@ -82,9 +81,9 @@ class WalletViewSet(ViewSet):
     
     @action(detail=False, methods=['get'], url_path='consuming-token')
     def generate_consuming_token(self, request):
-        wallet = Wallet.get_or_create_wallet(request.user)
+        wallet = models.Wallet.get_or_create_wallet(request.user)
         
-        ct = ConsumingToken.get_or_create_consuming_token(wallet)
+        ct = models.ConsumingToken.get_or_create_consuming_token(wallet)
 
         return Response({ 'consuming_token_uid': str(ct.uid) })
 
@@ -126,7 +125,10 @@ class OrderViewSet(ViewSet):
         result = { 'tickets': [] }
 
         if wallet and wallet.is_active:
-            result['tickets'] = serializers.OrderSerializer(wallet.ticket_set.all(), many=True).data
+            result['tickets'] = serializers.OrderSerializer(
+                wallet.ticket_set.all(),
+                many=True
+            ).data
         
         return Response(result)
 
@@ -137,6 +139,6 @@ class OrderViewSet(ViewSet):
 
         data = serializer.validated_data
 
-        Order.webhook_handler(data['uid'], data['status'])
+        models.Order.webhook_handler(data['uid'], data['status'])
 
         return Response(status=204)

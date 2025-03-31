@@ -3,10 +3,10 @@ from datetime import timedelta
 from django.db import models, transaction
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import NotFound
 from sales import exceptions
 from custom_auth.models import User
 from utils.models import BaseModel
-from rest_framework.exceptions import NotFound
 
 class Wallet(BaseModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
