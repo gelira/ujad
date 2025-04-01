@@ -8,9 +8,6 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['uid', 'name', 'description', 'price', 'quantity']
         read_only_fields = ['quantity']
 
-class ListProductsSerializer(serializers.Serializer):
-    products = serializers.ListField(child=ProductSerializer())
-
 class ProductQuantitySerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 

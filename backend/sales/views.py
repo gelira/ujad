@@ -6,13 +6,11 @@ from custom_auth import permissions
 from sales import serializers, models
 
 class ProductViewSet(ViewSet):
-    permission_classes = [permissions.IsAdminAuthenticatedAndActivePermission]
-
     def list(self, request, *args, **kwargs):
         products = models.Product.objects.order_by('name').all()
-        serializer = serializers.ListProductsSerializer({ 'products': products })
+        serializer = serializers.ProductSerializer(products, many=True)
 
-        return Response(serializer.data)
+        return Response({ 'products': serializer.data })
 
     def create(self, request, *args, **kwargs):
         serializer = serializers.ProductSerializer(data=request.data)
@@ -49,11 +47,9 @@ class ProductViewSet(ViewSet):
         if self.action == 'list':
             return []
 
-        return super().get_permissions()
+        return [permissions.IsAdminAuthenticatedAndActivePermission()]
 
 class WalletViewSet(ViewSet):
-    permission_classes = [permissions.IsConsumerAuthenticatedAndActivePermission]
-
     @action(detail=False, methods=['post'], url_path='orders')
     def orders_action(self, request):
         serializer = serializers.NewOrderSerializer(data=request.data)
@@ -116,22 +112,9 @@ class WalletViewSet(ViewSet):
         if self.action == 'consume':
             return [permissions.IsDispatcherAuthenticatedAndActivePermission()]
 
-        return super().get_permissions()
+        return [permissions.IsConsumerAuthenticatedAndActivePermission()]
 
 class OrderViewSet(ViewSet):
-    def list(self, request):
-        wallet = request.user.wallet_set.filter(is_active=True).first()
-
-        result = { 'tickets': [] }
-
-        if wallet and wallet.is_active:
-            result['tickets'] = serializers.OrderSerializer(
-                wallet.ticket_set.all(),
-                many=True
-            ).data
-        
-        return Response(result)
-
     @action(detail=False, methods=['post'], url_path='webhook')
     def webhook(self, request):
         serializer = serializers.OrderWebhookSerializer(data=request.data)

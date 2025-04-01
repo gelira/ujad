@@ -2,7 +2,6 @@ import uuid
 from datetime import timedelta
 from django.db import models, transaction
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import NotFound
 from sales import exceptions
 from custom_auth.models import User
@@ -35,7 +34,7 @@ class Wallet(BaseModel):
             )
 
             for p in products:
-                product = get_object_or_404(Product.objects.select_for_update(), uid=p['uid'])
+                product = Product.find_by_uid_or_404(p['uid'])
 
                 if product.quantity < p['quantity']:
                     raise exceptions.InsufficientProductStockException()
@@ -93,7 +92,7 @@ class Order(BaseModel):
 
     @classmethod
     def webhook_handler(cls, uid, status):
-        order = get_object_or_404(cls, uid=uid)
+        order = cls.find_by_uid_or_404(uid)
 
         if order.status != cls.STATUS_PENDING:
             return
