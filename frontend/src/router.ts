@@ -4,7 +4,14 @@ import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 import TicketsView from './views/TicketsView.vue'
 
-export const ROUTES: Record<string, { name: string, label: string }> = {
+type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS'
+
+interface RouteValue {
+  name: string
+  label: string
+}
+
+export const ROUTES: Record<RouteKey, RouteValue> = {
   HOME: {
     name: 'home',
     label: ''
