@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import { useAuthStore } from '@/stores/auth'
 import { useNavigationStore } from '@/stores/navigation'
@@ -11,6 +11,10 @@ const navigationStore = useNavigationStore()
 
 const drawerOpen = ref(false)
 
+const activeRouteName = computed(() => {
+  return navigationStore.activeRoute?.name ?? ''
+})
+
 function toggle() {
   drawerOpen.value = !drawerOpen.value
 }
@@ -18,6 +22,11 @@ function toggle() {
 function logout() {
   removeToken()
   navigationStore.goToLogin()
+}
+
+function navigate(routeName: string) {
+  navigationStore.navigate(routeName)
+  toggle()
 }
 </script>
 
@@ -34,16 +43,26 @@ function logout() {
         {{ authStore.user.name || authStore.user.email }}
       </v-list-item>
       <v-divider></v-divider>
+      
       <template v-if="authStore.user.role === 'consumer'">
         <v-list-item
+          color="primary"
           append-icon="mdi-ticket"
-          @click="navigationStore.goToTickets(); toggle()"
-          :active="navigationStore.activeRoute?.name === ROUTES.TICKETS.name"
-          active-color="primary"
+          :active="activeRouteName === ROUTES.TICKETS.name"
+          @click="navigate(ROUTES.TICKETS.name)"
         >
           {{ ROUTES.TICKETS.label }}
         </v-list-item>
+        <v-list-item
+          color="primary"
+          append-icon="mdi-cart"
+          :active="activeRouteName === ROUTES.NEW_ORDER.name"
+          @click="navigate(ROUTES.NEW_ORDER.name)"
+        >
+          {{ ROUTES.NEW_ORDER.label }}
+        </v-list-item>
       </template>
+      
       <v-divider></v-divider>
       <v-list-item
         append-icon="mdi-logout"

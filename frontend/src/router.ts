@@ -3,8 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 import TicketsView from './views/TicketsView.vue'
+import NewOrderView from './views/NewOrderView.vue'
 
-type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS'
+type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS' | 'NEW_ORDER'
 
 interface RouteValue {
   name: string
@@ -14,15 +15,19 @@ interface RouteValue {
 export const ROUTES: Record<RouteKey, RouteValue> = {
   HOME: {
     name: 'home',
-    label: ''
+    label: '',
   },
   LOGIN: {
     name: 'login',
-    label: ''
+    label: '',
   },
   TICKETS: {
     name: 'tickets',
-    label: 'Minhas fichinhas'
+    label: 'Minhas fichinhas',
+  },
+  NEW_ORDER: {
+    name: 'new-order',
+    label: 'Nova compra',
   },
 }
 
@@ -37,9 +42,14 @@ const router = createRouter({
         {
           path: 'tickets',
           name: ROUTES.TICKETS.name,
-          component: TicketsView
-        }
-      ]
+          component: TicketsView,
+        },
+        {
+          path: 'new-order',
+          name: ROUTES.NEW_ORDER.name,
+          component: NewOrderView,
+        },
+      ],
     },
     {
       path: '/login',

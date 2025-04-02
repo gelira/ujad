@@ -8,18 +8,18 @@ import { removeToken } from '@/utils/localStorage'
 import AppBar from '@/components/AppBar.vue'
 
 const authStore = useAuthStore()
-const navigationStore = useNavigationStore()
+const { goToTickets, goToLogin } = useNavigationStore()
 
 onMounted(() => {
   authStore.getUserInfo()
     .then(() => {
       if (authStore.user.role === 'consumer') {
-        navigationStore.goToTickets()
+        goToTickets()
       }
     })
     .catch(() => {
       removeToken()
-      navigationStore.goToLogin()
+      goToLogin()
     })
 })
 </script>

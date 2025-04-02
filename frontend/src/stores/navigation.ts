@@ -25,14 +25,20 @@ export const useNavigationStore = defineStore('navigation', () => {
     navigate(ROUTES.TICKETS.name)
   }
 
+  function goToNewOrder() {
+    navigate(ROUTES.NEW_ORDER.name)
+  }
+
   const activeRoute = computed(() => {
     return Object.values(ROUTES).find((r) => r.name === route.name)
   })
 
   return {
     activeRoute,
+    navigate,
     goToHome,
     goToLogin,
     goToTickets,
+    goToNewOrder,
   }
 })
