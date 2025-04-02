@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { RouterView } from 'vue-router'
 
 import { useNavigation } from '@/composables/navigation'
 import { useAuthStore } from '@/stores/auth'
-import { useProductStore } from '@/stores/products'
 import { removeToken } from '@/utils/localStorage'
 import AppBar from '@/components/AppBar.vue'
 
 const authStore = useAuthStore()
-const productStore = useProductStore()
 const navigation = useNavigation()
 
 onMounted(() => {
   authStore.getUserInfo()
-    .then(() => productStore.getProducts())
+    .then(() => {
+      if (authStore.user.role === 'consumer') {
+        navigation.goToTickets()
+      }
+    })
     .catch(() => {
       removeToken()
       navigation.goToLogin()
@@ -23,7 +26,7 @@ onMounted(() => {
 
 <template>
   <AppBar />
-  <v-container>
-    <h1>Hello World</h1>
+  <v-container class="mt-16">
+    <RouterView />
   </v-container>
 </template>
