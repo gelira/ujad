@@ -1,5 +1,14 @@
 <script setup lang="ts">
-defineProps<{ product: Product }>()
+import { computed } from 'vue'
+import { useWalletStore } from '@/stores/wallet'
+
+const props = defineProps<{ product: Product }>()
+
+const walletStore = useWalletStore()
+
+const orderItem = computed(() => {
+  return walletStore.orderItems.find((i) => i.uid === props.product.uid) ?? { uid: '', quantity: 0 }
+})
 </script>
 
 <template>
@@ -10,9 +19,17 @@ defineProps<{ product: Product }>()
       {{ product.description }}
     </v-card-text>
     <v-card-actions class="justify-space-between">
-      <v-btn icon="mdi-minus"></v-btn>
-      <span>0</span>
-      <v-btn icon="mdi-plus"></v-btn>
+      <v-btn
+        icon="mdi-minus"
+        :disabled="orderItem.quantity <= 0"
+        @click="walletStore.decrementProduct(product.uid)"
+      ></v-btn>
+      <span>{{ orderItem?.quantity ?? 0 }}</span>
+      <v-btn
+        icon="mdi-plus"
+        :disabled="product.quantity <= orderItem.quantity"
+        @click="walletStore.incrementProduct(product.uid)"
+      ></v-btn>
     </v-card-actions>
   </v-card>
 </template>
