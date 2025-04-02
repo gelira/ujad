@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-import { useNavigation } from '@/composables/navigation'
 import { useAlertStore } from '@/stores/alert'
 import { useAuthStore } from '@/stores/auth'
+import { useNavigationStore } from '@/stores/navigation'
 import { getToken } from '@/utils/localStorage'
 
 const alertStore = useAlertStore()
 const authStore = useAuthStore()
-const navigation = useNavigation()
+const navigationStore = useNavigationStore()
 
 const email = ref('')
 const code = ref('')
@@ -37,7 +37,7 @@ async function verifyStep() {
   try {
     await authStore.verifyAuthCode({ code: code.value.trim() })
 
-    navigation.goToHome()
+    navigationStore.goToHome()
   } catch {
     alertStore.showAlert('Verifique o código inserido e tente novamente')
   } finally {
@@ -74,7 +74,7 @@ function validateCode(value: string) {
 
 onMounted(() => {
   if (getToken()) {
-    navigation.goToHome()
+    navigationStore.goToHome()
   }
 })
 </script>

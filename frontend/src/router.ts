@@ -4,10 +4,19 @@ import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 import TicketsView from './views/TicketsView.vue'
 
-export const ROUTES = {
-  HOME: 'home',
-  LOGIN: 'login',
-  TICKETS: 'tickets',
+export const ROUTES: Record<string, { name: string, label: string }> = {
+  HOME: {
+    name: 'home',
+    label: ''
+  },
+  LOGIN: {
+    name: 'login',
+    label: ''
+  },
+  TICKETS: {
+    name: 'tickets',
+    label: 'Minhas fichinhas'
+  },
 }
 
 const router = createRouter({
@@ -15,19 +24,19 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: ROUTES.HOME,
+      name: ROUTES.HOME.name,
       component: HomeView,
       children: [
         {
           path: 'tickets',
-          name: ROUTES.TICKETS,
+          name: ROUTES.TICKETS.name,
           component: TicketsView
         }
       ]
     },
     {
       path: '/login',
-      name: ROUTES.LOGIN,
+      name: ROUTES.LOGIN.name,
       component: LoginView,
     },
   ],

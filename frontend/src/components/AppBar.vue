@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 
-import { useNavigation } from '@/composables/navigation'
 import { useAuthStore } from '@/stores/auth'
+import { useNavigationStore } from '@/stores/navigation'
 import { removeToken } from '@/utils/localStorage'
 
 const authStore = useAuthStore()
-const navigation = useNavigation()
+const navigationStore = useNavigationStore()
 
 const state = reactive({
   drawerOpen: false
@@ -18,7 +18,7 @@ function toggle() {
 
 function logout() {
   removeToken()
-  navigation.goToLogin()
+  navigationStore.goToLogin()
 }
 </script>
 
@@ -27,7 +27,7 @@ function logout() {
     <template v-slot:prepend>
       <v-app-bar-nav-icon @click="toggle" />
     </template>
-    <v-app-bar-title>UJAD</v-app-bar-title>
+    <v-app-bar-title>{{ navigationStore.routeLabel }}</v-app-bar-title>
   </v-app-bar>
   <v-navigation-drawer
     v-model="state.drawerOpen"
