@@ -6,20 +6,24 @@ import { useAuthStore } from '@/stores/auth'
 import { useNavigationStore } from '@/stores/navigation'
 import { removeToken } from '@/utils/localStorage'
 import AppBar from '@/components/AppBar.vue'
+import { ROUTES } from '@/router'
 
 const authStore = useAuthStore()
-const { goToTickets, goToLogin } = useNavigationStore()
+const navigationStore = useNavigationStore()
 
 onMounted(() => {
   authStore.getUserInfo()
     .then(() => {
-      if (authStore.user.role === 'consumer') {
-        goToTickets()
+      if (
+        authStore.user.role === 'consumer' &&
+        navigationStore.activeRoute?.name === ROUTES.HOME.name
+      ) {
+        navigationStore.goToTickets()
       }
     })
     .catch(() => {
       removeToken()
-      goToLogin()
+      navigationStore.goToLogin()
     })
 })
 </script>
