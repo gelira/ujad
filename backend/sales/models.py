@@ -34,7 +34,7 @@ class Wallet(BaseModel):
             )
 
             for p in products:
-                product = Product.find_by_uid_or_404(p['uid'])
+                product = Product.find_by_uid_or_404(str(p['uid']))
 
                 if product.quantity < p['quantity']:
                     raise exceptions.InsufficientProductStockException()

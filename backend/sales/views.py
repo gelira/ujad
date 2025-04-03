@@ -122,6 +122,6 @@ class OrderViewSet(ViewSet):
 
         data = serializer.validated_data
 
-        models.Order.webhook_handler(data['uid'], data['status'])
+        models.Order.webhook_handler(str(data['uid']), data['status'])
 
         return Response(status=204)
