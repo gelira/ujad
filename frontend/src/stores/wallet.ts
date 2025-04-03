@@ -16,7 +16,15 @@ export const useWalletStore = defineStore('wallet', () => {
     try {
       const { data } = await apiGetTickets(all)
 
-      tickets.value = data.tickets
+      tickets.value = data.tickets.sort((a, b) => {
+        if (!a.consumed && b.consumed) {
+          return -1
+        }
+        if (a.consumed && !b.consumed) {
+          return 1
+        }
+        return a.product_name.localeCompare(b.product_name)
+      })
     } catch {
       tickets.value = []
     }
