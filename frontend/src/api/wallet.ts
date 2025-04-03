@@ -5,3 +5,7 @@ export function apiGetTickets(all = false) {
     params: all ? { all: 'true' } : {}
   })
 }
+
+export function apiNewOrder(products: { uid: string, quantity: number }[]) {
+  return authApiClient().post('/wallet/orders', { products })
+}

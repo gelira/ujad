@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onBeforeUnmount } from 'vue'
 
 import { useProductStore } from '@/stores/products'
+import { useWalletStore } from '@/stores/wallet'
 import ProductCard from '@/components/orders/ProductCard.vue'
 import OrderConfirmation from '@/components/orders/OrderConfirmation.vue'
 
 const productStore = useProductStore()
+const walletStore = useWalletStore()
 
 onMounted(() => {
   productStore.getProducts()
+})
+
+onBeforeUnmount(() => {
+  walletStore.cleanCart()
 })
 </script>
 

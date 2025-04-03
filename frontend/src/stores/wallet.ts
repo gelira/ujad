@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import { apiGetTickets } from '@/api/wallet'
+import { apiGetTickets, apiNewOrder } from '@/api/wallet'
 
 interface OrderItem {
   uid: string
@@ -49,11 +49,21 @@ export const useWalletStore = defineStore('wallet', () => {
     updateItemQuantity(productUid, -1)
   }
 
+  function cleanCart() {
+    orderItems.value = []
+  }
+
+  function newOrder() {
+    return apiNewOrder(orderItems.value)
+  }
+
   return {
     tickets,
     orderItems,
     getTickets,
     incrementProduct,
     decrementProduct,
+    cleanCart,
+    newOrder,
   }
 })
