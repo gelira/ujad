@@ -2,8 +2,8 @@
 import { onMounted } from 'vue'
 
 import { useProductStore } from '@/stores/products'
-import ProductCard from '@/components/ProductCard.vue'
-import OrderConfirmation from '@/components/OrderConfirmation.vue'
+import ProductCard from '@/components/orders/ProductCard.vue'
+import OrderConfirmation from '@/components/orders/OrderConfirmation.vue'
 
 const productStore = useProductStore()
 
