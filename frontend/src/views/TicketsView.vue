@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 
 import { useWalletStore } from '@/stores/wallet'
+import ConsumingQrcode from '@/components/ConsumingQrcode.vue'
 
 const walletStore = useWalletStore()
 
@@ -20,7 +21,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="d-flex justify-center mb-3">
+  <div class="d-flex justify-space-between mb-3">
     <v-btn-toggle
       v-model="toggle"
       color="primary"
@@ -29,6 +30,8 @@ onMounted(() => {
       <v-btn variant="outlined" value="not-consumed">Disponíveis</v-btn>
       <v-btn variant="outlined" value="all">Todas</v-btn>
     </v-btn-toggle>
+
+    <ConsumingQrcode />
   </div>
   <v-table class="elevation-1">
     <tbody>
