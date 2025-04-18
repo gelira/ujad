@@ -9,3 +9,7 @@ export function apiGetTickets(all = false) {
 export function apiNewOrder(products: { uid: string, quantity: number }[]) {
   return authApiClient().post('/wallet/orders', { products })
 }
+
+export function apiConsumingToken() {
+  return authApiClient().get<{ consuming_token_uid: string, expired_at: string }>('/wallet/consuming-token')
+}

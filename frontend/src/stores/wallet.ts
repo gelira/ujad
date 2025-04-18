@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import { apiGetTickets, apiNewOrder } from '@/api/wallet'
+import { apiGetTickets, apiNewOrder, apiConsumingToken } from '@/api/wallet'
 
 interface OrderItem {
   uid: string
@@ -11,6 +11,8 @@ interface OrderItem {
 export const useWalletStore = defineStore('wallet', () => {
   const tickets = ref<Ticket[]>([])
   const orderItems = ref<OrderItem[]>([])
+  const consumingToken = ref('')
+  const consumingTokenExpireTime = ref(0)
 
   async function getTickets(all = false) {
     try {
@@ -61,6 +63,24 @@ export const useWalletStore = defineStore('wallet', () => {
     orderItems.value = []
   }
 
+  function getConsumingToken() {
+    const now = new Date().getTime()
+
+    if (consumingTokenExpireTime.value > now) {
+      return
+    }
+
+    apiConsumingToken()
+      .then(({ data }) => {
+        consumingToken.value = data.consuming_token_uid
+        consumingTokenExpireTime.value = new Date(data.expired_at).getTime()
+      })
+      .catch(() => {
+        consumingToken.value = ''
+        consumingTokenExpireTime.value = 0
+      })
+  }
+
   function newOrder() {
     return apiNewOrder(orderItems.value)
   }
@@ -68,10 +88,12 @@ export const useWalletStore = defineStore('wallet', () => {
   return {
     tickets,
     orderItems,
+    consumingToken,
     getTickets,
     incrementProduct,
     decrementProduct,
     cleanCart,
+    getConsumingToken,
     newOrder,
   }
 })
