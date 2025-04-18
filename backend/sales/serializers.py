@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from sales.models import Product, Order, Ticket
+from sales.models import Product, Order, Ticket, ConsumingToken
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,6 +62,13 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
     status = serializers.ChoiceField(choices=[Order.STATUS_CONFIRMED, Order.STATUS_CANCELED])
+
+class ConsumingTokenSerializer(serializers.ModelSerializer):
+    consuming_token_uid = serializers.UUIDField(source='uid')
+    
+    class Meta:
+        model = ConsumingToken
+        fields = ['consuming_token_uid', 'expired_at']
 
 class ConsumeSerializer(serializers.Serializer):
     tickets = serializers.ListField(

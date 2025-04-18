@@ -81,7 +81,7 @@ class WalletViewSet(ViewSet):
         
         ct = models.ConsumingToken.get_or_create_consuming_token(wallet)
 
-        return Response({ 'consuming_token_uid': str(ct.uid) })
+        return Response(serializers.ConsumingTokenSerializer(ct).data)
 
     @action(detail=False, methods=['get', 'post'], url_path='consume')
     def consume(self, request):
