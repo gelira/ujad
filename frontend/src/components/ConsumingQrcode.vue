@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import VueQrcode from '@chenfengyuan/vue-qrcode'
 import { useWalletStore } from '@/stores/wallet'
+import VueQrcode from '@chenfengyuan/vue-qrcode'
 
 const open = ref(false)
 const walletStore = useWalletStore()
