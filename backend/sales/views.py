@@ -89,22 +89,32 @@ class WalletViewSet(ViewSet):
 
         ct = models.ConsumingToken.find_by_uid_or_404(ct_uid)
 
-        result = { 'tickets': None }
+        result = {}
 
         if request.method == 'GET':
-            result['tickets'] = serializers.TicketSerializer(
+            u = ct.wallet.user
+
+            serializer = serializers.TicketSerializer(
                 ct.wallet.get_tickets(),
                 many=True
-            ).data
+            )
+
+            result.update({
+                'name': u.name,
+                'email': u.email,
+                'tickets': serializer.data
+            })
         
         else:
             serializer = serializers.ConsumeSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            result['tickets'] = ct.consume(
+            tickets_consumed = ct.consume(
                 request.user,
                 serializer.validated_data['tickets']
             )
+
+            result.update({ 'tickets': tickets_consumed })
 
         return Response(result)
     

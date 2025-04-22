@@ -43,10 +43,7 @@ class NewOrderSerializer(serializers.Serializer):
         return attrs
 
 class TicketSerializer(serializers.ModelSerializer):
-    product_name = serializers.SerializerMethodField()
-
-    def get_product_name(self, instance):
-        return instance.product.name
+    product_name = serializers.CharField(source='product.name')
 
     class Meta:
         model = Ticket
