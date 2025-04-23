@@ -44,24 +44,30 @@ function navigate(routeName: string) {
       </v-list-item>
       <v-divider></v-divider>
       
-      <template v-if="authStore.user.role === 'consumer'">
-        <v-list-item
-          color="primary"
-          append-icon="mdi-ticket"
-          :active="activeRouteName === ROUTES.TICKETS.name"
-          @click="navigate(ROUTES.TICKETS.name)"
-        >
-          {{ ROUTES.TICKETS.label }}
-        </v-list-item>
-        <v-list-item
-          color="primary"
-          append-icon="mdi-cart"
-          :active="activeRouteName === ROUTES.NEW_ORDER.name"
-          @click="navigate(ROUTES.NEW_ORDER.name)"
-        >
-          {{ ROUTES.NEW_ORDER.label }}
-        </v-list-item>
-      </template>
+      <v-list-item
+        color="primary"
+        append-icon="mdi-ticket"
+        :active="activeRouteName === ROUTES.TICKETS.name"
+        @click="navigate(ROUTES.TICKETS.name)"
+      >
+        {{ ROUTES.TICKETS.label }}
+      </v-list-item>
+      <v-list-item
+        color="primary"
+        append-icon="mdi-cart"
+        :active="activeRouteName === ROUTES.NEW_ORDER.name"
+        @click="navigate(ROUTES.NEW_ORDER.name)"
+      >
+        {{ ROUTES.NEW_ORDER.label }}
+      </v-list-item>
+      <v-list-item
+        color="primary"
+        append-icon="mdi-silverware-fork-knife"
+        :active="activeRouteName === ROUTES.CONSUME.name"
+        @click="navigate(ROUTES.CONSUME.name)"
+      >
+        {{ ROUTES.CONSUME.label }}
+      </v-list-item>
       
       <v-divider></v-divider>
       <v-list-item
