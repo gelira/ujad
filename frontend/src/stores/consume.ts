@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { apiGetConsumingTokenInfo } from '@/api/wallet'
 
@@ -23,6 +23,10 @@ export const useConsumeStore = defineStore('consume', () => {
     tickets.value = []
     ticketIdsSelected.value = []
   }
+
+  const ticketsSelected = computed(() => {
+    return tickets.value.filter((t) => ticketIdsSelected.value.includes(t.uid))
+  })
 
   watch(
     consumingToken,
@@ -48,6 +52,7 @@ export const useConsumeStore = defineStore('consume', () => {
     email,
     tickets,
     ticketIdsSelected,
+    ticketsSelected,
     clean,
     getConsumingTokenInfo,
   }
