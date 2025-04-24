@@ -19,3 +19,9 @@ export function apiGetConsumingTokenInfo(consuming_token_uid: string) {
     params: { consuming_token_uid }
   })
 }
+
+export function apiConsume(consuming_token_uid: string, tickets: string[]) {
+  return authApiClient().post<{ tickets: string[] }>('/wallet/consume', { tickets }, {
+    params: { consuming_token_uid }
+  })
+}

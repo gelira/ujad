@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 
-import { apiGetConsumingTokenInfo } from '@/api/wallet'
+import { apiGetConsumingTokenInfo, apiConsume } from '@/api/wallet'
 
 const sortTickets = (a: Ticket, b: Ticket) => a.product_name.localeCompare(b.product_name)
 
@@ -11,6 +11,10 @@ export const useConsumeStore = defineStore('consume', () => {
   const email = ref('')
   const tickets = ref<Ticket[]>([])
   const ticketIdsSelected = ref<string[]>([])
+
+  const ticketsSelected = computed(() => {
+    return tickets.value.filter((t) => ticketIdsSelected.value.includes(t.uid))
+  })
 
   function getConsumingTokenInfo(token: string) {
     consumingToken.value = token
@@ -24,9 +28,17 @@ export const useConsumeStore = defineStore('consume', () => {
     ticketIdsSelected.value = []
   }
 
-  const ticketsSelected = computed(() => {
-    return tickets.value.filter((t) => ticketIdsSelected.value.includes(t.uid))
-  })
+  function consume() {
+    return new Promise<void>((resolve, reject) => {
+      if (!consumingToken.value || !ticketIdsSelected.value.length) {
+        return resolve()
+      }
+
+      apiConsume(consumingToken.value, ticketIdsSelected.value)
+        .then(() => resolve())
+        .catch(() => reject())
+    })
+  }
 
   watch(
     consumingToken,
@@ -53,6 +65,7 @@ export const useConsumeStore = defineStore('consume', () => {
     tickets,
     ticketIdsSelected,
     ticketsSelected,
+    consume,
     clean,
     getConsumingTokenInfo,
   }

@@ -1,10 +1,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useAlertStore } from '@/stores/alert'
 import { useConsumeStore } from '@/stores/consume'
 
+const alertStore = useAlertStore()
 const consumeStore = useConsumeStore()
 
 const dialog = ref(false)
+
+function consume() {
+  consumeStore.consume()
+    .then(() => {
+      consumeStore.clean()
+      alertStore.showAlert('Consumo registrado com sucesso.')
+
+      dialog.value = false
+    })
+    .catch(() => {
+      alertStore.showAlert('Algo deu errado. Tente novamente.')
+    })
+}
 </script>
 
 <template>
@@ -37,7 +52,7 @@ const dialog = ref(false)
 
         <v-spacer></v-spacer>
 
-        <v-btn color="green" variant="elevated">
+        <v-btn color="green" variant="elevated" @click="consume">
           Confirmar
         </v-btn>
       </v-card-actions>
