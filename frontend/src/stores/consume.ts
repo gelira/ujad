@@ -3,11 +3,14 @@ import { ref, watch } from 'vue'
 
 import { apiGetConsumingTokenInfo } from '@/api/wallet'
 
+const sortTickets = (a: Ticket, b: Ticket) => a.product_name.localeCompare(b.product_name)
+
 export const useConsumeStore = defineStore('consume', () => {
   const consumingToken = ref('')
   const name = ref('')
   const email = ref('')
   const tickets = ref<Ticket[]>([])
+  const ticketIdsSelected = ref<string[]>([])
 
   function getConsumingTokenInfo(token: string) {
     consumingToken.value = token
@@ -18,6 +21,7 @@ export const useConsumeStore = defineStore('consume', () => {
     name.value = ''
     email.value = ''
     tickets.value = []
+    ticketIdsSelected.value = []
   }
 
   watch(
@@ -31,7 +35,7 @@ export const useConsumeStore = defineStore('consume', () => {
         .then(({ data }) => {
           name.value = data.name
           email.value = data.email
-          tickets.value = data.tickets.sort((a, b) => a.product_name.localeCompare(b.product_name))
+          tickets.value = data.tickets.sort(sortTickets)
         })
         .catch(() => {
           clean()
@@ -43,6 +47,7 @@ export const useConsumeStore = defineStore('consume', () => {
     name,
     email,
     tickets,
+    ticketIdsSelected,
     clean,
     getConsumingTokenInfo,
   }

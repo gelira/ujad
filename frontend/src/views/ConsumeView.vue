@@ -22,8 +22,8 @@ const consumeStore = useConsumeStore()
       >
         <td>
           <v-checkbox
-            v-model="ticketsSelected"
             color="primary"
+            v-model="consumeStore.ticketIdsSelected"
             :label="t.product_name"
             :value="t.uid"
           ></v-checkbox>
