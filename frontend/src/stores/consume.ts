@@ -14,6 +14,7 @@ export const useConsumeStore = defineStore('consume', () => {
   }
 
   function clean() {
+    consumingToken.value = ''
     name.value = ''
     email.value = ''
     tickets.value = []
@@ -23,7 +24,7 @@ export const useConsumeStore = defineStore('consume', () => {
     consumingToken,
     (v) => {
       if (!v) {
-        return clean()
+        return
       }
 
       apiGetConsumingTokenInfo(v)
@@ -42,6 +43,7 @@ export const useConsumeStore = defineStore('consume', () => {
     name,
     email,
     tickets,
+    clean,
     getConsumingTokenInfo,
   }
 })

@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useConsumeStore } from '@/stores/consume'
+import QrcodeReader from '@/components/consume/QrcodeReader.vue'
 
 const ticketsSelected = ref<string[]>([])
 
 const consumeStore = useConsumeStore()
-
-onMounted(() => {
-  consumeStore.getConsumingTokenInfo('27c196fc-b463-40d7-8d11-2e2ae382b5fb')
-})
 </script>
 
 <template>
-  <div class="d-flex justify-space-between mb-3">
-  </div>
-  <v-table class="elevation-1">
+  <v-table class="elevation-1 mb-15" v-if="consumeStore.tickets.length > 0">
+    <thead>
+      <tr>
+        <th>Consumidor: {{ consumeStore.name || consumeStore.email }}</th>
+      </tr>
+    </thead>
     <tbody>
       <tr
         v-for="t in consumeStore.tickets"
@@ -31,6 +31,13 @@ onMounted(() => {
       </tr>
     </tbody>
   </v-table>
+  <v-sheet
+    elevation="4"
+    class="position-fixed left-0 right-0 bottom-0 w-100 pl-4 pr-4 pt-2 pb-2 d-flex justify-space-between align-center"
+  >
+    <QrcodeReader />
+    <v-btn color="green" :disabled="ticketsSelected.length === 0">Confirmar</v-btn>
+  </v-sheet>
 </template>
 
 <style scoped>
