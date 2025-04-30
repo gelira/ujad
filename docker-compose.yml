@@ -2,7 +2,7 @@ services:
   db:
     container_name: db
     image: postgres:17-alpine
-    restart: unless-stopped
+    restart: always
     shm_size: 256mb
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -11,12 +11,10 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - 127.0.0.1:5432:5432
-    env_file:
-      - ./docker.env
 
   adminer:
     image: adminer
-    restart: unless-stopped
+    restart: always
     depends_on:
       - db
     ports:
@@ -29,7 +27,7 @@ services:
       dockerfile: ./frontend/Dockerfile
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-    restart: unless-stopped
+    restart: always
     ports:
       - 127.0.0.1:8081:80
     profiles:
@@ -54,13 +52,11 @@ services:
       SMTP_SERVER: ${SMTP_SERVER}
       SMTP_PORT: ${SMTP_PORT}
 
-    restart: unless-stopped
+    restart: always
     depends_on:
       - db
     profiles:
       - production
-    env_file:
-      - ./docker.env
 
 volumes:
   pgdata:
