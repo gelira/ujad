@@ -14,11 +14,15 @@ const navigationStore = useNavigationStore()
 onMounted(() => {
   authStore.getUserInfo()
     .then(() => {
+      const routeName = navigationStore.activeRoute?.name
+
       if (
-        authStore.user.role === 'consumer' &&
-        navigationStore.activeRoute?.name === ROUTES.HOME.name
+        routeName === ROUTES.HOME.name ||
+        routeName === ROUTES.CONSUME.name
       ) {
-        navigationStore.goToTickets()
+        authStore.user.role === 'consumer'
+          ? navigationStore.goToTickets()
+          : navigationStore.goToConsume()
       }
     })
     .catch(() => {

@@ -1,9 +1,20 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import { useConsumeStore } from '@/stores/consume'
+import { useNavigationStore } from '@/stores/navigation'
 import QrcodeReaderDialog from '@/components/consume/QrcodeReaderDialog.vue'
 import ConsumeConfirmationDialog from '@/components/consume/ConsumeConfirmationDialog.vue'
 
+const authStore = useAuthStore()
 const consumeStore = useConsumeStore()
+const navigationStore = useNavigationStore()
+
+onMounted(() => {
+  if (authStore.user.role !== 'dispatcher') {
+    navigationStore.goToTickets()
+  }
+})
 </script>
 
 <template>
