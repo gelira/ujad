@@ -37,11 +37,13 @@ function navigate(routeName: string) {
     </template>
     <v-app-bar-title>{{ navigationStore.activeRoute?.label }}</v-app-bar-title>
   </v-app-bar>
+
   <v-navigation-drawer v-model="drawerOpen" temporary>
     <v-list>
       <v-list-item>
         {{ authStore.user.name || authStore.user.email }}
       </v-list-item>
+
       <v-divider></v-divider>
       
       <v-list-item
@@ -61,6 +63,7 @@ function navigate(routeName: string) {
         {{ ROUTES.NEW_ORDER.label }}
       </v-list-item>
       <v-list-item
+        v-if="authStore.user.role === 'dispatcher'"
         color="primary"
         append-icon="mdi-silverware-fork-knife"
         :active="activeRouteName === ROUTES.CONSUME.name"
@@ -70,6 +73,7 @@ function navigate(routeName: string) {
       </v-list-item>
       
       <v-divider></v-divider>
+
       <v-list-item
         append-icon="mdi-logout"
         class="logout"
