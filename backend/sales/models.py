@@ -121,12 +121,8 @@ class Product(BaseModel):
     price = models.IntegerField()
     quantity = models.IntegerField(default=0)
 
-    def update_quantity(self, diff):
-        with transaction.atomic():
-            self.quantity = models.F('quantity') + diff
-            self.save()
-
-        self.refresh_from_db()
+    class Meta:
+        ordering = ['name']
 
 class Ticket(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
