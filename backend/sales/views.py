@@ -1,51 +1,36 @@
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from custom_auth import permissions
 from sales import serializers, models
+from sales.models import Product
 
-class ProductViewSet(ViewSet):
+class ProductViewSet(ModelViewSet):
+    lookup_field = 'uid'
+    lookup_value_converter = 'uuid'
+
+    def get_queryset(self):
+        return Product.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == 'update_quantity':
+            return serializers.ProductQuantitySerializer
+
+        return serializers.ProductSerializer
+
     def list(self, request, *args, **kwargs):
-        products = models.Product.objects.order_by('name').all()
-        serializer = serializers.ProductSerializer(products, many=True)
+        response = super().list(request, *args, **kwargs)
 
-        return Response({ 'products': serializer.data })
-
-    def create(self, request, *args, **kwargs):
-        serializer = serializers.ProductSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data, status=201)
-    
-    def partial_update(self, request, *args, **kwargs):
-        product = models.Product.find_by_uid_or_404(kwargs['pk'])
-        serializer = serializers.ProductSerializer(product, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data)
+        return Response({ 'products': response.data })
     
     @action(detail=True, methods=['patch'], url_path='quantity')
-    def update_quantity(self, request, pk=None):
-        serializer = serializers.ProductQuantitySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        product = models.Product.find_by_uid_or_404(pk)
-        product.update_quantity(serializer.validated_data['quantity'])
+    def update_quantity(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
-        return Response(serializers.ProductSerializer(product).data)
-    
-    def destroy(self, request, *args, **kwargs):
-        product = models.Product.find_by_uid_or_404(kwargs['pk'])
-        product.delete()
-
-        return Response(status=204)
-    
     def get_permissions(self):
         if self.action == 'list':
-            return []
+            return super().get_permissions()
 
         return [permissions.IsAdminAuthenticatedAndActivePermission()]
 
