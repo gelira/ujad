@@ -11,10 +11,19 @@ class User(BaseModel):
     ROLE_ADMIN = 'admin'
     ROLE_CONSUMER = 'consumer'
     ROLE_DISPATCHER = 'dispatcher'
+    ROLE_CHOICES = [
+        (ROLE_ADMIN, ROLE_ADMIN),
+        (ROLE_CONSUMER, ROLE_CONSUMER),
+        (ROLE_DISPATCHER, ROLE_DISPATCHER)
+    ]
 
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255, blank=True)
-    role = models.CharField(max_length=50, blank=True)
+    role = models.CharField(
+        max_length=50,
+        choices=ROLE_CHOICES,
+        default=ROLE_CONSUMER
+    )
     is_active = models.BooleanField(default=True)
 
     @classmethod
