@@ -2,9 +2,27 @@ from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from custom_auth import permissions
-from sales import serializers, models
-from sales.models import Product
+from custom_auth.permissions import (
+    IsAdminAuthenticatedAndActivePermission,
+    IsConsumerAuthenticatedAndActivePermission,
+    IsDispatcherAuthenticatedAndActivePermission,
+)
+from sales.models import (
+    ConsumingToken,
+    Order,
+    Product,
+    Wallet,
+)
+from sales.serializers import (
+    ConsumeSerializer,
+    ConsumingTokenSerializer,
+    NewOrderSerializer,
+    OrderSerializer,
+    OrderWebhookSerializer,
+    ProductQuantitySerializer,
+    ProductSerializer,
+    TicketSerializer,
+)
 
 class ProductViewSet(ModelViewSet):
     lookup_field = 'uid'
@@ -15,9 +33,9 @@ class ProductViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'update_quantity':
-            return serializers.ProductQuantitySerializer
+            return ProductQuantitySerializer
 
-        return serializers.ProductSerializer
+        return ProductSerializer
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
@@ -32,29 +50,29 @@ class ProductViewSet(ModelViewSet):
         if self.action == 'list':
             return super().get_permissions()
 
-        return [permissions.IsAdminAuthenticatedAndActivePermission()]
+        return [IsAdminAuthenticatedAndActivePermission()]
 
 class WalletViewSet(ViewSet):
     @action(detail=False, methods=['post'], url_path='orders')
     def orders_action(self, request):
-        serializer = serializers.NewOrderSerializer(data=request.data)
+        serializer = NewOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        order = models.Wallet.process_new_order(
+        order = Wallet.process_new_order(
             request.user,
             serializer.validated_data['products']
         )
 
-        return Response(serializers.OrderSerializer(order).data)
+        return Response(OrderSerializer(order).data)
     
     @action(detail=False, methods=['get'], url_path='tickets')
     def tickets(self, request):
-        all = bool(request.query_params.get('all'))
+        all_tickets = bool(request.query_params.get('all'))
 
-        wallet = models.Wallet.get_or_create_wallet(request.user)
+        wallet = Wallet.get_or_create_wallet(request.user)
         
-        serializer = serializers.TicketSerializer(
-            wallet.get_tickets(all),
+        serializer = TicketSerializer(
+            wallet.get_tickets(all_tickets),
             many=True
         )
 
@@ -62,24 +80,24 @@ class WalletViewSet(ViewSet):
     
     @action(detail=False, methods=['get'], url_path='consuming-token')
     def generate_consuming_token(self, request):
-        wallet = models.Wallet.get_or_create_wallet(request.user)
+        wallet = Wallet.get_or_create_wallet(request.user)
         
-        ct = models.ConsumingToken.get_or_create_consuming_token(wallet)
+        ct = ConsumingToken.get_or_create_consuming_token(wallet)
 
-        return Response(serializers.ConsumingTokenSerializer(ct).data)
+        return Response(ConsumingTokenSerializer(ct).data)
 
     @action(detail=False, methods=['get', 'post'], url_path='consume')
     def consume(self, request):
         ct_uid = request.query_params.get('consuming_token_uid')
 
-        ct = models.ConsumingToken.find_by_uid_or_404(ct_uid)
+        ct = ConsumingToken.find_by_uid_or_404(ct_uid)
 
         result = {}
 
-        if request.method == 'GET':
+        if request.method.lower() == 'get':
             u = ct.wallet.user
 
-            serializer = serializers.TicketSerializer(
+            serializer = TicketSerializer(
                 ct.wallet.get_tickets(),
                 many=True
             )
@@ -91,7 +109,7 @@ class WalletViewSet(ViewSet):
             })
         
         else:
-            serializer = serializers.ConsumeSerializer(data=request.data)
+            serializer = ConsumeSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
             tickets_consumed = ct.consume(
@@ -105,18 +123,18 @@ class WalletViewSet(ViewSet):
     
     def get_permissions(self):
         if self.action == 'consume':
-            return [permissions.IsDispatcherAuthenticatedAndActivePermission()]
+            return [IsDispatcherAuthenticatedAndActivePermission()]
 
-        return [permissions.IsConsumerAuthenticatedAndActivePermission()]
+        return [IsConsumerAuthenticatedAndActivePermission()]
 
 class OrderViewSet(ViewSet):
     @action(detail=False, methods=['post'], url_path='webhook')
     def webhook(self, request):
-        serializer = serializers.OrderWebhookSerializer(data=request.data)
+        serializer = OrderWebhookSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
 
-        models.Order.webhook_handler(str(data['uid']), data['status'])
+        Order.webhook_handler(str(data['uid']), data['status'])
 
         return Response(status=204)
