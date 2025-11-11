@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from sales.models import Product, Order, Ticket, ConsumingToken
-from sales.services import update_product_quantity
+from sales.services import ProductServices
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,7 +13,7 @@ class ProductQuantitySerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
     def save(self):
-        update_product_quantity(
+        ProductServices.update_quantity(
             self.instance,
             self.validated_data['quantity']
         )
