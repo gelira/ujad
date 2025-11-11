@@ -26,7 +26,7 @@ class Order(BaseModel):
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
-        default=STATUS_PENDING
+        default=STATUS_CREATED
     )
     original_value = models.IntegerField(default=0)
     remaining_value = models.IntegerField(default=0)
