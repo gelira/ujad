@@ -9,11 +9,11 @@ class BaseModel(SoftDeleteModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     @classmethod
-    def find_by_uid_or_404(cls, uid):
+    def find_by_uid_or_404(cls, uid, **filters):
         try:
             validated_uid = uuid.UUID(uid)
-            return cls.objects.get(uid=validated_uid)
-        
+            return cls.objects.get(uid=validated_uid, **filters)
+
         except Exception:
             raise NotFound()
 
