@@ -7,12 +7,7 @@ from custom_auth.permissions import (
     IsConsumerAuthenticatedAndActivePermission,
     IsDispatcherAuthenticatedAndActivePermission,
 )
-from sales.models import (
-    ConsumingToken,
-    Order,
-    Product,
-    Wallet,
-)
+from sales.models import Product
 from sales.serializers import (
     ConsumeSerializer,
     ConsumingTokenSerializer,
@@ -22,6 +17,10 @@ from sales.serializers import (
     ProductQuantitySerializer,
     ProductSerializer,
     TicketSerializer,
+)
+from sales.services import (
+    OrderServices,
+    WalletServices,
 )
 
 class ProductViewSet(ModelViewSet):
@@ -58,69 +57,65 @@ class WalletViewSet(ViewSet):
         serializer = NewOrderSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        order = Wallet.process_new_order(
+        order = WalletServices.process_new_order(
             request.user,
             serializer.validated_data['products']
         )
 
         return Response(OrderSerializer(order).data)
-    
+
     @action(detail=False, methods=['get'], url_path='tickets')
     def tickets(self, request):
         all_tickets = bool(request.query_params.get('all'))
 
-        wallet = Wallet.get_or_create_wallet(request.user)
-        
-        serializer = TicketSerializer(
-            wallet.get_tickets(all_tickets),
-            many=True
-        )
+        tickets_qs = WalletServices.get_tickets(request.user, all_tickets)
+        serializer = TicketSerializer(tickets_qs, many=True)
 
         return Response({ 'tickets': serializer.data })
-    
+
     @action(detail=False, methods=['get'], url_path='consuming-token')
     def generate_consuming_token(self, request):
-        wallet = Wallet.get_or_create_wallet(request.user)
-        
-        ct = ConsumingToken.get_or_create_consuming_token(wallet)
+        ct = WalletServices.get_or_create_consuming_token(request.user)
 
         return Response(ConsumingTokenSerializer(ct).data)
 
     @action(detail=False, methods=['get', 'post'], url_path='consume')
     def consume(self, request):
-        ct_uid = request.query_params.get('consuming_token_uid')
+        consuming_token_uid = request.query_params.get('consuming_token_uid')
 
-        ct = ConsumingToken.find_by_uid_or_404(ct_uid)
+        consuming_token = WalletServices.get_consuming_token(consuming_token_uid)
 
         result = {}
 
         if request.method.lower() == 'get':
-            u = ct.wallet.user
+            consuming_token_user = consuming_token.wallet.user
 
-            serializer = TicketSerializer(
-                ct.wallet.get_tickets(),
-                many=True
+            tickets_qs = WalletServices.get_tickets(
+                consuming_token_user,
+                wallet=consuming_token.wallet
             )
+            serializer = TicketSerializer(tickets_qs, many=True)
 
             result.update({
-                'name': u.name,
-                'email': u.email,
+                'name': consuming_token_user.name,
+                'email': consuming_token_user.email,
                 'tickets': serializer.data
             })
-        
+
         else:
             serializer = ConsumeSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            tickets_consumed = ct.consume(
+            tickets_consumed = WalletServices.consume(
                 request.user,
+                consuming_token,
                 serializer.validated_data['tickets']
             )
 
             result.update({ 'tickets': tickets_consumed })
 
         return Response(result)
-    
+
     def get_permissions(self):
         if self.action == 'consume':
             return [IsDispatcherAuthenticatedAndActivePermission()]
@@ -135,6 +130,6 @@ class OrderViewSet(ViewSet):
 
         data = serializer.validated_data
 
-        Order.webhook_handler(str(data['uid']), data['status'])
+        OrderServices.webhook_handler(str(data['uid']), data['status'])
 
         return Response(status=204)
