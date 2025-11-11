@@ -45,7 +45,7 @@ class Product(BaseModel):
 
 class Ticket(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='tickets')
     dispatcher = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     product_price = models.IntegerField()
     consumed = models.BooleanField(default=False)
