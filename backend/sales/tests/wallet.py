@@ -56,6 +56,7 @@ class WalletViewSetTest(APITestCase):
         response = self.client.post(self.orders_url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('order_uid', response.data)
         self.assertEqual(Order.objects.count(), 2)
         self.assertEqual(Ticket.objects.filter(order__wallet__user=self.consumer_user).count(), 5) # 2 existing + 3 new
         self.product1.refresh_from_db()
