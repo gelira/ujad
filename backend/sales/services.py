@@ -39,8 +39,7 @@ class WalletServices:
             wallet = WalletServices.get_or_create_wallet(user)
 
             order = Order.objects.create(
-                wallet=wallet,
-                payment_method='teste'
+                wallet=wallet
             )
 
             for p in products:

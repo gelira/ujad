@@ -62,7 +62,7 @@ class WalletViewSet(ViewSet):
             serializer.validated_data['products']
         )
 
-        return Response(OrderSerializer(order).data)
+        return Response({ 'order_uid': str(order.uid) })
 
     @action(detail=False, methods=['get'], url_path='tickets')
     def tickets(self, request):
