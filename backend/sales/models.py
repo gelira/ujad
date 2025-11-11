@@ -7,10 +7,12 @@ class Wallet(BaseModel):
     is_active = models.BooleanField(default=True)
 
 class Order(BaseModel):
+    STATUS_CREATED = 'created'
     STATUS_PENDING = 'pending'
     STATUS_CANCELED = 'canceled'
     STATUS_CONFIRMED = 'confirmed'
     STATUS_CHOICES = [
+        (STATUS_CREATED, STATUS_CREATED),
         (STATUS_PENDING, STATUS_PENDING),
         (STATUS_CANCELED, STATUS_CANCELED),
         (STATUS_CONFIRMED, STATUS_CONFIRMED),
@@ -18,16 +20,19 @@ class Order(BaseModel):
 
     wallet = models.ForeignKey(
         Wallet,
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
+        null=True
     )
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
         default=STATUS_PENDING
     )
-    payment_method = models.CharField(max_length=50)
     original_value = models.IntegerField(default=0)
     remaining_value = models.IntegerField(default=0)
+    reference_id = models.CharField(max_length=100, blank=True)
+    description = models.CharField(max_length=200, blank=True)
+    payment_method = models.CharField(max_length=50, blank=True)
 
 class Product(BaseModel):
     name = models.CharField(max_length=100)
