@@ -30,12 +30,19 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function getUserInfo() {
-    const { data } = await apiGetUserInfo()
-
-    user.uid = data.uid
-    user.name = data.name
-    user.email = data.email
-    user.role = data.role
+    try {
+      const { data } = await apiGetUserInfo()
+  
+      user.uid = data.uid
+      user.name = data.name
+      user.email = data.email
+      user.role = data.role
+    } catch {
+      user.uid = ''
+      user.name = ''
+      user.email = ''
+      user.role = ''
+    }
   }
 
   return { user, generateAuthCode, verifyAuthCode, getUserInfo }
