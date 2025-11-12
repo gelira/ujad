@@ -164,7 +164,7 @@ class OrderServices:
         with transaction.atomic():
             product_quantity_dict = {}
 
-            for po in order.ticket_set.all():
+            for po in order.tickets.all():
                 product_quantity_dict[po.product_id] = \
                     product_quantity_dict.get(po.product_id, 0) + 1
 
