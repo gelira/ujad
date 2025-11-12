@@ -1,4 +1,12 @@
-from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.viewsets import (
+    ViewSet,
+    ModelViewSet,
+    GenericViewSet,
+)
+from rest_framework.mixins import (
+    ListModelMixin,
+    RetrieveModelMixin,
+)
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
@@ -7,7 +15,7 @@ from custom_auth.permissions import (
     IsConsumerAuthenticatedAndActivePermission,
     IsDispatcherAuthenticatedAndActivePermission,
 )
-from sales.models import Product
+from sales.models import Product, Order
 from sales.serializers import (
     ConsumeSerializer,
     ConsumingTokenSerializer,
@@ -122,7 +130,34 @@ class WalletViewSet(ViewSet):
 
         return [IsConsumerAuthenticatedAndActivePermission()]
 
-class OrderViewSet(ViewSet):
+class OrderViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    GenericViewSet
+):
+    lookup_field = 'uid'
+    lookup_value_converter = 'uuid'
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        qs = Order.objects.all()
+
+        if self.action == 'list':
+            qs = qs.filter(wallet__user_id=self.request.user.id)
+
+        return qs
+
+    def get_permissions(self):
+        if self.action == 'list':
+            return [IsConsumerAuthenticatedAndActivePermission()]
+
+        return []
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        return Response({ 'orders': response.data })
+
     @action(detail=False, methods=['post'], url_path='webhook')
     def webhook(self, request):
         serializer = OrderWebhookSerializer(data=request.data)
