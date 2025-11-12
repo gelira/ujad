@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { useAuthStore } from './stores/auth'
+import ConsumeView from './views/ConsumeView.vue'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
-import TicketsView from './views/TicketsView.vue'
 import NewOrderView from './views/NewOrderView.vue'
-import ConsumeView from './views/ConsumeView.vue'
+import TicketsView from './views/TicketsView.vue'
 
 type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS' | 'NEW_ORDER' | 'CONSUME'
 
@@ -43,6 +44,7 @@ const router = createRouter({
       path: '/',
       name: ROUTES.HOME.name,
       component: HomeView,
+      meta: { requiresAuth: true },
       children: [
         {
           path: 'tickets',
@@ -65,8 +67,31 @@ const router = createRouter({
       path: '/login',
       name: ROUTES.LOGIN.name,
       component: LoginView,
+      beforeEnter() {
+        const authStore = useAuthStore()
+
+        if (authStore.user.uid) {
+          return { name: ROUTES.HOME.name }
+        }
+      }
     },
   ],
+})
+
+router.beforeEach(async (to, _, next) => {
+  const authStore = useAuthStore()
+
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+
+  if (requiresAuth && !authStore.user.uid) {
+    await authStore.getUserInfo()
+  }
+
+  if (requiresAuth && !authStore.user.uid) {
+    return next({ name: ROUTES.LOGIN.name })
+  }
+
+  next()
 })
 
 export default router
