@@ -65,7 +65,15 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value', 'tickets']
+        fields = [
+            'uid',
+            'status',
+            'description',
+            'payment_method',
+            'original_value',
+            'remaining_value',
+            'tickets'
+        ]
 
 class OrderWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
