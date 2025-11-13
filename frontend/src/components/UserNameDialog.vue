@@ -4,7 +4,6 @@ import { onMounted, ref, watch } from 'vue';
 
 const authStore = useAuthStore()
 
-const open = ref(false)
 const name = ref('')
 
 async function save() {
@@ -13,13 +12,13 @@ async function save() {
   } catch {
     // do nothing
   } finally {
-    open.value = false
+    authStore.openUserNameDialog = false
   }
 }
 
 onMounted(() => {
   if (!authStore.user.name) {
-    open.value = true
+    authStore.openUserNameDialog = true
   }
 })
 
@@ -33,7 +32,7 @@ watch(
 </script>
 
 <template>
-  <v-dialog v-model="open" persistent>
+  <v-dialog v-model="authStore.openUserNameDialog" persistent>
     <v-card title="Informe seu nome">
       <v-card-text>
         <v-text-field
@@ -43,7 +42,7 @@ watch(
         ></v-text-field>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="red" @click="open = false">
+        <v-btn color="red" @click="authStore.openUserNameDialog = false">
           Fechar
         </v-btn>
         <v-btn color="success" @click="save">

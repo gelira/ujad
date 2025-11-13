@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 
+import { ROUTES } from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import { useNavigationStore } from '@/stores/navigation'
 import { removeToken } from '@/utils/localStorage'
-import { ROUTES } from '@/router'
 
 const authStore = useAuthStore()
 const navigationStore = useNavigationStore()
@@ -40,7 +40,9 @@ function navigate(routeName: string) {
 
   <v-navigation-drawer v-model="drawerOpen" temporary>
     <v-list>
-      <v-list-item>
+      <v-list-item
+        @click="authStore.openUserNameDialog = true"
+      >
         {{ authStore.user.name || authStore.user.email }}
       </v-list-item>
 

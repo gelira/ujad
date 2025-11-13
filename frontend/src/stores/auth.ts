@@ -6,6 +6,7 @@ import { setToken } from '@/utils/localStorage'
 
 export const useAuthStore = defineStore('auth', () => {
   const authCodeUid = ref('')
+  const openUserNameDialog = ref(false)
   const user = reactive<User>({
     uid: '',
     name: '',
@@ -51,5 +52,12 @@ export const useAuthStore = defineStore('auth', () => {
     user.name = name
   }
 
-  return { user, generateAuthCode, verifyAuthCode, getUserInfo, updateUserName }
+  return {
+    user,
+    openUserNameDialog,
+    generateAuthCode,
+    verifyAuthCode,
+    getUserInfo,
+    updateUserName,
+  }
 })
