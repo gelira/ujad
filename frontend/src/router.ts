@@ -50,16 +50,19 @@ const router = createRouter({
           path: 'tickets',
           name: ROUTES.TICKETS.name,
           component: TicketsView,
+          meta: { requiredRole: 'consumer' },
         },
         {
           path: 'new-order',
           name: ROUTES.NEW_ORDER.name,
           component: NewOrderView,
+          meta: { requiredRole: 'consumer' },
         },
         {
           path: 'consume',
           name: ROUTES.CONSUME.name,
           component: ConsumeView,
+          meta: { requiredRole: 'dispatcher' },
         },
       ],
     },
@@ -87,11 +90,25 @@ router.beforeEach(async (to, _, next) => {
     await authStore.getUserInfo()
   }
 
-  if (requiresAuth && !authStore.user.uid) {
+  if (requiresAuth && (!authStore.user.uid || !authStore.user.role)) {
     return next({ name: ROUTES.LOGIN.name })
   }
 
-  next()
+  const requiredRole = to.matched.reduce((acc, record) => {
+    const role = record.meta.requiredRole as string
+
+    return role || acc
+  }, '')
+
+  if (requiredRole && authStore.user.role !== requiredRole) {
+    if (requiredRole === 'dispatcher') {
+      return next({ name: ROUTES.TICKETS.name })
+    }
+
+    return next({ name: ROUTES.CONSUME.name })
+  }
+
+  return next()
 })
 
 export default router
