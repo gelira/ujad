@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 
-import { apiGenerateAuthCode, apiGetUserInfo, apiVerifyAuthCode } from '@/api/auth'
+import { apiGenerateAuthCode, apiGetUserInfo, apiPatchUserInfo, apiVerifyAuthCode } from '@/api/auth'
 import { setToken } from '@/utils/localStorage'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -45,5 +45,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { user, generateAuthCode, verifyAuthCode, getUserInfo }
+  async function updateUserName(name: string) {
+    await apiPatchUserInfo({ name })
+
+    user.name = name
+  }
+
+  return { user, generateAuthCode, verifyAuthCode, getUserInfo, updateUserName }
 })
