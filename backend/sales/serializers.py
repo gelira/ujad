@@ -67,8 +67,20 @@ class TicketSerializer(serializers.ModelSerializer):
             'consumed'
         ]
 
+class TicketOrderSerializer(serializers.ModelSerializer):
+    product_uid = serializers.UUIDField(source='product.uid')
+    product_name = serializers.CharField(source='product.name')
+
+    class Meta:
+        model = Ticket
+        fields = [
+            'product_uid',
+            'product_name',
+            'product_price',
+        ]
+
 class OrderSerializer(serializers.ModelSerializer):
-    tickets = TicketSerializer(many=True, read_only=True)
+    tickets = TicketOrderSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
