@@ -21,6 +21,7 @@ from sales.serializers import (
     ConsumingTokenSerializer,
     NewOrderSerializer,
     OrderSerializer,
+    ListOrderSerializer,
     OrderWebhookSerializer,
     ProductQuantitySerializer,
     ProductSerializer,
@@ -137,7 +138,6 @@ class OrderViewSet(
 ):
     lookup_field = 'uid'
     lookup_value_converter = 'uuid'
-    serializer_class = OrderSerializer
 
     def get_queryset(self):
         qs = Order.objects.all()
@@ -146,6 +146,12 @@ class OrderViewSet(
             qs = qs.filter(wallet__user_id=self.request.user.id)
 
         return qs
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ListOrderSerializer
+
+        return OrderSerializer
 
     def get_permissions(self):
         if self.action == 'list':

@@ -54,11 +54,18 @@ class NewOrderSerializer(serializers.Serializer):
         return attrs
 
 class TicketSerializer(serializers.ModelSerializer):
+    product_uid = serializers.UUIDField(source='product.uid')
     product_name = serializers.CharField(source='product.name')
 
     class Meta:
         model = Ticket
-        fields = ['uid', 'product_name', 'product_price', 'consumed']
+        fields = [
+            'uid',
+            'product_uid',
+            'product_name',
+            'product_price',
+            'consumed'
+        ]
 
 class OrderSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(many=True, read_only=True)
@@ -66,13 +73,29 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
+            'id',
             'uid',
             'status',
             'description',
             'payment_method',
             'original_value',
             'remaining_value',
-            'tickets'
+            'tickets',
+            'created_at'
+        ]
+
+class ListOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'uid',
+            'status',
+            'description',
+            'payment_method',
+            'original_value',
+            'remaining_value',
+            'created_at',
         ]
 
 class OrderWebhookSerializer(serializers.Serializer):
