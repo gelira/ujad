@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 
 import { apiGenerateAuthCode, apiGetUserInfo, apiPatchUserInfo, apiVerifyAuthCode } from '@/api/auth'
-import { setToken } from '@/utils/localStorage'
+import { removeToken, setToken } from '@/utils/localStorage'
 
 export const useAuthStore = defineStore('auth', () => {
   const authCodeUid = ref('')
@@ -52,6 +52,14 @@ export const useAuthStore = defineStore('auth', () => {
     user.name = name
   }
 
+  async function logout() {
+    removeToken()
+    user.uid = ''
+    user.name = ''
+    user.email = ''
+    user.role = ''
+  }
+
   return {
     user,
     openUserNameDialog,
@@ -59,5 +67,6 @@ export const useAuthStore = defineStore('auth', () => {
     verifyAuthCode,
     getUserInfo,
     updateUserName,
+    logout,
   }
 })

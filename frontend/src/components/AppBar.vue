@@ -4,7 +4,6 @@ import { computed, ref } from 'vue'
 import { ROUTES } from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import { useNavigationStore } from '@/stores/navigation'
-import { removeToken } from '@/utils/localStorage'
 
 const authStore = useAuthStore()
 const navigationStore = useNavigationStore()
@@ -20,7 +19,7 @@ function toggle() {
 }
 
 function logout() {
-  removeToken()
+  authStore.logout()
   navigationStore.goToLogin()
 }
 
