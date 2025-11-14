@@ -34,6 +34,12 @@ class Order(BaseModel):
     description = models.CharField(max_length=200, blank=True)
     payment_method = models.CharField(max_length=50, blank=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['created_at']),
+        ]
+        ordering = ['-created_at']
+
 class Product(BaseModel):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
