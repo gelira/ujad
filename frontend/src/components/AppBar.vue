@@ -49,6 +49,7 @@ function navigate(routeName: string) {
       <v-divider></v-divider>
       
       <v-list-item
+        v-if="authStore.user.role === 'consumer'"
         color="primary"
         append-icon="mdi-ticket"
         :active="activeRouteName === ROUTES.TICKETS.name"
@@ -57,6 +58,7 @@ function navigate(routeName: string) {
         {{ ROUTES.TICKETS.label }}
       </v-list-item>
       <v-list-item
+        v-if="authStore.user.role === 'consumer'"
         color="primary"
         append-icon="mdi-cart"
         :active="activeRouteName === ROUTES.NEW_ORDER.name"
