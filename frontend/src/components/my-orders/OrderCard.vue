@@ -32,9 +32,9 @@ const createdAt = computed(() => {
     </v-card-title>
     <v-card-text>
       <div class="d-flex flex-column ga-2">
-        <p>Valor do pedido: {{ originalValue }}</p>
         <p>Data do pedido: {{ createdAt }}</p>
-        <p v-if="order.status !== 'created'">Método de pagamento: {{ order.payment_method }}</p>
+        <p>Valor do pedido: <strong>{{ originalValue }}</strong></p>
+        <p v-if="order.status !== 'created'">Método de pagamento: <strong>{{ order.payment_method }}</strong></p>
       </div>
     </v-card-text>
     <v-card-actions class="justify-end">
@@ -48,6 +48,6 @@ const createdAt = computed(() => {
 
 <style scoped>
 .v-card-text {
-  padding-bottom: 0;
+  padding-block: 12px 0;
 }
 </style>
