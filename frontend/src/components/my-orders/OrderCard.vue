@@ -1,9 +1,32 @@
 <script setup lang="ts">
+import { formatCurrency } from '@/utils/currency';
+import { computed } from 'vue';
 import OrderStatus from './OrderStatus.vue';
 
-defineProps<{
+const props = defineProps<{
   order: ListOrder
 }>()
+
+const originalValue = computed(() => {
+  return formatCurrency(props.order.original_value / 100)
+})
+
+const createdAt = computed(() => {
+  const dt = new Date(props.order.created_at)
+  
+  const date = dt.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+
+  const time = dt.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+
+  return `${date} às ${time}`
+})
 </script>
 
 <template>
@@ -17,14 +40,13 @@ defineProps<{
       </div>
     </v-card-title>
     <v-card-text>
-      {{ order.original_value }}
+      <p>Valor do pedido: {{ originalValue }}</p>
+      <p>Data do pedido: {{ createdAt }}</p>
+      <p v-if="order.status !== 'created'">Método de pagamento: {{ order.payment_method }}</p>
     </v-card-text>
-    <v-card-actions class="justify-space-between">
+    <v-card-actions class="justify-end">
       <v-btn
-        icon="mdi-minus"
-      ></v-btn>
-      <v-btn
-        icon="mdi-plus"
+        icon="mdi-open-in-new"
       ></v-btn>
     </v-card-actions>
   </v-card>

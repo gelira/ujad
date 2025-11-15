@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useWalletStore } from '@/stores/wallet';
+import { formatCurrency } from '@/utils/currency';
 import { computed } from 'vue';
 
 const props = defineProps<{ product: Product }>()
@@ -13,10 +14,7 @@ const orderItem = computed(() => {
 })
 
 const price = computed(() => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(props.product.price / 100)
+  return formatCurrency(props.product.price / 100)
 })
 </script>
 
