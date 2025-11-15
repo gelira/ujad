@@ -104,6 +104,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'payment_method',
             'original_value',
             'remaining_value',
+            'consumer',
             'tickets',
             'created_at'
         ]
