@@ -7,8 +7,9 @@ import LoginView from './views/LoginView.vue'
 import MyOrdersView from './views/MyOrdersView.vue'
 import NewOrderView from './views/NewOrderView.vue'
 import TicketsView from './views/TicketsView.vue'
+import OrderView from './views/OrderView.vue'
 
-type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS' | 'NEW_ORDER' | 'CONSUME' | 'MY_ORDERS'
+type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS' | 'NEW_ORDER' | 'CONSUME' | 'MY_ORDERS' | 'ORDER'
 
 interface RouteValue {
   name: string
@@ -35,6 +36,10 @@ export const ROUTES: Record<RouteKey, RouteValue> = {
   MY_ORDERS: {
     name: 'my-orders',
     label: 'Minhas compras',
+  },
+  ORDER: {
+    name: 'order',
+    label: '',
   },
   CONSUME: {
     name: 'consume',
@@ -76,6 +81,11 @@ const router = createRouter({
           meta: { requiredRole: 'dispatcher' },
         },
       ],
+    },
+    {
+      path: '/order/:uid',
+      name: ROUTES.ORDER.name,
+      component: OrderView,
     },
     {
       path: '/login',

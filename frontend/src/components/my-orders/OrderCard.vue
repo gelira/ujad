@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useNavigationStore } from '@/stores/navigation';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 import { computed } from 'vue';
@@ -7,6 +8,8 @@ import OrderStatus from './OrderStatus.vue';
 const props = defineProps<{
   order: ListOrder
 }>()
+
+const navigationStore = useNavigationStore()
 
 const originalValue = computed(() => {
   return formatCurrency(props.order.original_value / 100)
@@ -28,14 +31,23 @@ const createdAt = computed(() => {
       </div>
     </v-card-title>
     <v-card-text>
-      <p>Valor do pedido: {{ originalValue }}</p>
-      <p>Data do pedido: {{ createdAt }}</p>
-      <p v-if="order.status !== 'created'">Método de pagamento: {{ order.payment_method }}</p>
+      <div class="d-flex flex-column ga-2">
+        <p>Valor do pedido: {{ originalValue }}</p>
+        <p>Data do pedido: {{ createdAt }}</p>
+        <p v-if="order.status !== 'created'">Método de pagamento: {{ order.payment_method }}</p>
+      </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn
         icon="mdi-open-in-new"
+        @click="navigationStore.goToOrder(order.uid)"
       ></v-btn>
     </v-card-actions>
   </v-card>
 </template>
+
+<style scoped>
+.v-card-text {
+  padding-bottom: 0;
+}
+</style>
