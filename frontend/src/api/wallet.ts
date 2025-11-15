@@ -7,7 +7,7 @@ export function apiGetTickets(all = false) {
 }
 
 export function apiNewOrder(products: { uid: string, quantity: number }[]) {
-  return authApiClient().post('/api/wallet/orders', { products })
+  return authApiClient().post<{ order_uid: string }>('/api/wallet/orders', { products })
 }
 
 export function apiConsumingToken() {
