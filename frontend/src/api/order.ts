@@ -1,0 +1,9 @@
+import { authApiClient, noAuthApiClient } from './client'
+
+export function apiListOrders() {
+  return authApiClient().get<{ orders: ListOrder[] }>('/api/orders')
+}
+
+export function apiGetOrder({ uid }: { uid: string }) {
+  return noAuthApiClient().get<Order>(`/api/orders/${uid}`)
+}
