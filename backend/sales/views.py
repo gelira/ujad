@@ -146,7 +146,7 @@ class OrderViewSet(
             qs = qs.filter(wallet__user_id=self.request.user.id)
 
         return qs
-    
+
     def get_serializer_class(self):
         if self.action == 'list':
             return ListOrderSerializer
@@ -172,5 +172,15 @@ class OrderViewSet(
         data = serializer.validated_data
 
         OrderServices.webhook_handler(str(data['uid']), data['status'])
+
+        return Response(status=204)
+
+    @action(detail=True, methods=['post'], url_path='payment')
+    def payment(self, request, *args, **kwargs):
+        order = self.get_object()
+
+        order.payment_method = 'Teste'
+        order.status = Order.STATUS_PENDING
+        order.save()
 
         return Response(status=204)
