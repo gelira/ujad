@@ -6,8 +6,8 @@ import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
 import MyOrdersView from './views/MyOrdersView.vue'
 import NewOrderView from './views/NewOrderView.vue'
-import TicketsView from './views/TicketsView.vue'
 import OrderView from './views/OrderView.vue'
+import TicketsView from './views/TicketsView.vue'
 
 type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS' | 'NEW_ORDER' | 'CONSUME' | 'MY_ORDERS' | 'ORDER'
 
@@ -105,11 +105,11 @@ const router = createRouter({
 router.beforeEach(async (to, _, next) => {
   const authStore = useAuthStore()
 
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
-
-  if (requiresAuth && !authStore.user.uid) {
+  if(!authStore.user.uid) {
     await authStore.getUserInfo()
   }
+
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
 
   if (requiresAuth && (!authStore.user.uid || !authStore.user.role)) {
     return next({ name: ROUTES.LOGIN.name })

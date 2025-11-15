@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useAlertStore } from '@/stores/alert';
+import { useAuthStore } from '@/stores/auth';
+import { useNavigationStore } from '@/stores/navigation';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 import { computed } from 'vue';
@@ -7,6 +10,10 @@ import OrderStatus from '../my-orders/OrderStatus.vue';
 const props = defineProps<{
   order: Order
 }>()
+
+const alertStore = useAlertStore()
+const authStore = useAuthStore()
+const navigationStore = useNavigationStore()
 
 const consumerName = computed(() => {
   const consumer = props.order.consumer
@@ -47,6 +54,16 @@ const items = computed(() => {
     return acc
   }, [])
 })
+
+async function copyToClipboard() {
+  try {
+    await navigator.clipboard.writeText(location.href);
+
+    alertStore.showAlert('O link está pronto para ser compartilhado')
+  } catch {
+    // do nothing
+  }
+}
 </script>
 
 <template>
@@ -83,12 +100,15 @@ const items = computed(() => {
     <v-card-actions class="justify-end">
       <v-btn
         icon="mdi-share-variant"
+        @click="copyToClipboard()"
       >
       </v-btn>
       <v-spacer></v-spacer>
       <v-btn
         color="primary"
         variant="flat"
+        v-if="authStore.user.uid"
+        @click="navigationStore.goToMyOrders()"
       >
         Voltar
       </v-btn>

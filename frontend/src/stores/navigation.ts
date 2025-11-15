@@ -33,6 +33,10 @@ export const useNavigationStore = defineStore('navigation', () => {
     navigate(ROUTES.CONSUME.name)
   }
 
+  function goToMyOrders() {
+    navigate(ROUTES.MY_ORDERS.name)
+  }
+
   function goToOrder(uid: string) {
     navigate(ROUTES.ORDER.name, { uid })
   }
@@ -50,5 +54,6 @@ export const useNavigationStore = defineStore('navigation', () => {
     goToNewOrder,
     goToConsume,
     goToOrder,
+    goToMyOrders,
   }
 })
