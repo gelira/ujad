@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatCurrency } from '@/utils/currency';
+import { formatDate } from '@/utils/date';
 import { computed } from 'vue';
 import OrderStatus from './OrderStatus.vue';
 
@@ -12,20 +13,7 @@ const originalValue = computed(() => {
 })
 
 const createdAt = computed(() => {
-  const dt = new Date(props.order.created_at)
-  
-  const date = dt.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-
-  const time = dt.toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-
-  return `${date} às ${time}`
+  return formatDate(props.order.created_at)
 })
 </script>
 
