@@ -80,7 +80,19 @@ class TicketOrderSerializer(serializers.ModelSerializer):
         ]
 
 class OrderSerializer(serializers.ModelSerializer):
+    consumer = serializers.SerializerMethodField()
     tickets = TicketOrderSerializer(many=True, read_only=True)
+
+    def get_consumer(self, obj):
+        wallet = obj.wallet
+
+        if not wallet:
+            return None
+
+        return {
+            'name': wallet.user.name,
+            'email': wallet.user.email
+        }
 
     class Meta:
         model = Order
