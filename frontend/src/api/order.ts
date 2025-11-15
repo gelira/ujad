@@ -4,6 +4,6 @@ export function apiListOrders() {
   return authApiClient().get<{ orders: ListOrder[] }>('/api/orders')
 }
 
-export function apiGetOrder({ uid }: { uid: string }) {
+export function apiGetOrder(uid: string) {
   return noAuthApiClient().get<Order>(`/api/orders/${uid}`)
 }

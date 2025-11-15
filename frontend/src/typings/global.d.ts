@@ -42,6 +42,10 @@ declare global {
 
   interface Order extends ListOrder {
     tickets: OrderTicket[]
+    consumer?: {
+      name: string
+      email: string
+    }
   }
 }
 
