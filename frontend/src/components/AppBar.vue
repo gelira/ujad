@@ -59,6 +59,15 @@ function navigate(routeName: string) {
       <v-list-item
         v-if="authStore.user.role === 'consumer'"
         color="primary"
+        append-icon="mdi-invoice-list"
+        :active="activeRouteName === ROUTES.MY_ORDERS.name"
+        @click="navigate(ROUTES.MY_ORDERS.name)"
+      >
+        {{ ROUTES.MY_ORDERS.label }}
+      </v-list-item>
+      <v-list-item
+        v-if="authStore.user.role === 'consumer'"
+        color="primary"
         append-icon="mdi-cart"
         :active="activeRouteName === ROUTES.NEW_ORDER.name"
         @click="navigate(ROUTES.NEW_ORDER.name)"

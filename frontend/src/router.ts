@@ -4,10 +4,11 @@ import { useAuthStore } from './stores/auth'
 import ConsumeView from './views/ConsumeView.vue'
 import HomeView from './views/HomeView.vue'
 import LoginView from './views/LoginView.vue'
+import MyOrdersView from './views/MyOrdersView.vue'
 import NewOrderView from './views/NewOrderView.vue'
 import TicketsView from './views/TicketsView.vue'
 
-type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS' | 'NEW_ORDER' | 'CONSUME'
+type RouteKey = 'HOME' | 'LOGIN' | 'TICKETS' | 'NEW_ORDER' | 'CONSUME' | 'MY_ORDERS'
 
 interface RouteValue {
   name: string
@@ -30,6 +31,10 @@ export const ROUTES: Record<RouteKey, RouteValue> = {
   NEW_ORDER: {
     name: 'new-order',
     label: 'Nova compra',
+  },
+  MY_ORDERS: {
+    name: 'my-orders',
+    label: 'Minhas compras',
   },
   CONSUME: {
     name: 'consume',
@@ -56,6 +61,12 @@ const router = createRouter({
           path: 'new-order',
           name: ROUTES.NEW_ORDER.name,
           component: NewOrderView,
+          meta: { requiredRole: 'consumer' },
+        },
+        {
+          path: 'my-orders',
+          name: ROUTES.MY_ORDERS.name,
+          component: MyOrdersView,
           meta: { requiredRole: 'consumer' },
         },
         {
