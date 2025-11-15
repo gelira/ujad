@@ -7,3 +7,7 @@ export function apiListOrders() {
 export function apiGetOrder(uid: string) {
   return noAuthApiClient().get<Order>(`/api/orders/${uid}`)
 }
+
+export function apiPostOrderPayment(uid: string) {
+  return noAuthApiClient().post(`/api/orders/${uid}/payment`)
+}

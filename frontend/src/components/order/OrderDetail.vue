@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { apiPostOrderPayment } from '@/api/order';
 import { useAlertStore } from '@/stores/alert';
 import { useAuthStore } from '@/stores/auth';
 import { useNavigationStore } from '@/stores/navigation';
@@ -10,6 +11,8 @@ import OrderStatus from '../my-orders/OrderStatus.vue';
 const props = defineProps<{
   order: Order
 }>()
+
+const emit = defineEmits<(e: 'refetch') => void>()
 
 const alertStore = useAlertStore()
 const authStore = useAuthStore()
@@ -64,6 +67,22 @@ async function copyToClipboard() {
     // do nothing
   }
 }
+
+async function pay() {
+  try {
+    await apiPostOrderPayment(props.order.uid)
+
+    alertStore.showAlert('Pagamento realizado com sucesso')
+
+    if (authStore.user.role === 'consumer') {
+      return navigationStore.goToMyOrders()
+    }
+
+    emit('refetch')
+  } catch {
+    alertStore.showAlert('Não foi possível realizar o pagamento')
+  }
+}
 </script>
 
 <template>
@@ -115,6 +134,8 @@ async function copyToClipboard() {
       <v-btn
         color="success"
         variant="flat"
+        @click="pay"
+        v-if="order.status === 'created'"
       >
         Pagar
       </v-btn>

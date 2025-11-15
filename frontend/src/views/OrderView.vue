@@ -8,22 +8,26 @@ const order = ref<Order | null>();
 
 const route = useRoute();
 
+function fetchOrder() {
+  const uid = route.params.uid as string
+
+  if (!uid) {
+    order.value = null
+    return
+  }
+
+  apiGetOrder(uid)
+    .then((res) => {
+      order.value = res.data
+    })
+    .catch(() => {
+      order.value = null
+    })
+}
+
 watch(
   () => route.params.uid as string,
-  (uid) => {
-    if (!uid) {
-      order.value = null
-      return
-    }
-
-    apiGetOrder(uid)
-      .then((res) => {
-        order.value = res.data
-      })
-      .catch(() => {
-        order.value = null
-      })
-  },
+  () => fetchOrder(),
   { immediate: true }
 )
 </script>
@@ -33,6 +37,7 @@ watch(
     <OrderDetail
       v-if="order"
       :order="order"
+      @refetch="fetchOrder"
     />
   </v-container>
 </template>
