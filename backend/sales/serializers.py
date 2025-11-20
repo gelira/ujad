@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from sales.models import Product, Order, Ticket, ConsumingToken
+from sales.services import ProductServices
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,6 +11,16 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class ProductQuantitySerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
+
+    def save(self):
+        ProductServices.update_quantity(
+            self.instance,
+            self.validated_data['quantity']
+        )
+
+        self.instance.refresh_from_db()
+
+        return self.instance
 
 class ProductForNewOrderSerializer(serializers.Serializer):
     uid = serializers.UUIDField()
@@ -43,18 +54,74 @@ class NewOrderSerializer(serializers.Serializer):
         return attrs
 
 class TicketSerializer(serializers.ModelSerializer):
+    product_uid = serializers.UUIDField(source='product.uid')
     product_name = serializers.CharField(source='product.name')
 
     class Meta:
         model = Ticket
-        fields = ['uid', 'product_name', 'product_price', 'consumed']
+        fields = [
+            'uid',
+            'product_uid',
+            'product_name',
+            'product_price',
+            'consumed'
+        ]
+
+class TicketOrderSerializer(serializers.ModelSerializer):
+    product_uid = serializers.UUIDField(source='product.uid')
+    product_name = serializers.CharField(source='product.name')
+
+    class Meta:
+        model = Ticket
+        fields = [
+            'product_uid',
+            'product_name',
+            'product_price',
+        ]
 
 class OrderSerializer(serializers.ModelSerializer):
-    tickets = TicketSerializer(many=True, read_only=True)
+    consumer = serializers.SerializerMethodField()
+    tickets = TicketOrderSerializer(many=True, read_only=True)
+
+    def get_consumer(self, obj):
+        wallet = obj.wallet
+
+        if not wallet:
+            return None
+
+        return {
+            'name': wallet.user.name,
+            'email': wallet.user.email
+        }
 
     class Meta:
         model = Order
-        fields = ['uid', 'status', 'payment_method', 'original_value', 'remaining_value', 'tickets']
+        fields = [
+            'id',
+            'uid',
+            'status',
+            'description',
+            'payment_method',
+            'original_value',
+            'remaining_value',
+            'consumer',
+            'tickets',
+            'created_at'
+        ]
+
+class ListOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = [
+            'id',
+            'uid',
+            'status',
+            'description',
+            'payment_method',
+            'original_value',
+            'remaining_value',
+            'created_at',
+        ]
 
 class OrderWebhookSerializer(serializers.Serializer):
     uid = serializers.UUIDField()

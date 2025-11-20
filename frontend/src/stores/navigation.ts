@@ -1,7 +1,7 @@
 
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { defineStore } from 'pinia'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { ROUTES } from '@/router'
 
@@ -9,8 +9,8 @@ export const useNavigationStore = defineStore('navigation', () => {
   const router = useRouter()
   const route = useRoute()
 
-  function navigate(routeName: string) {
-    route.name !== routeName && router.push({ name: routeName })
+  function navigate(routeName: string, params?: Record<string, string>) {
+    route.name !== routeName && router.push({ name: routeName, params })
   }
 
   function goToHome() {
@@ -33,6 +33,14 @@ export const useNavigationStore = defineStore('navigation', () => {
     navigate(ROUTES.CONSUME.name)
   }
 
+  function goToMyOrders() {
+    navigate(ROUTES.MY_ORDERS.name)
+  }
+
+  function goToOrder(uid: string) {
+    navigate(ROUTES.ORDER.name, { uid })
+  }
+
   const activeRoute = computed(() => {
     return Object.values(ROUTES).find((r) => r.name === route.name)
   })
@@ -45,5 +53,7 @@ export const useNavigationStore = defineStore('navigation', () => {
     goToTickets,
     goToNewOrder,
     goToConsume,
+    goToOrder,
+    goToMyOrders,
   }
 })

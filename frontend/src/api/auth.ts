@@ -11,3 +11,7 @@ export function apiVerifyAuthCode({ auth_code_uid, code }: { auth_code_uid: stri
 export function apiGetUserInfo() {
   return authApiClient().get<User>('/api/user/info')
 }
+
+export function apiPatchUserInfo({ name }: { name: string }) {
+  return authApiClient().patch<User>('/api/user/info', { name })
+}

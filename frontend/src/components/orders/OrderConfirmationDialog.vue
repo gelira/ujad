@@ -1,23 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useWalletStore } from '@/stores/wallet'
 import { useAlertStore } from '@/stores/alert'
-import ProductOrderResume from './ProductOrderResume.vue'
+import { useNavigationStore } from '@/stores/navigation'
+import { useWalletStore } from '@/stores/wallet'
 import { formatCurrency } from '@/utils/currency'
+import { ref } from 'vue'
+import ProductOrderResume from './ProductOrderResume.vue'
 
 defineProps<{ orderValue: number }>()
 
 const alertStore = useAlertStore()
 const walletStore = useWalletStore()
+const navigationStore = useNavigationStore()
 
 const dialog = ref(false)
 
 function confirmNewOrder() {
   walletStore.newOrder()
-    .then(() => {
+    .then(({ data }) => {
       dialog.value = false
       walletStore.cleanCart()
       alertStore.showAlert('Suas fichinhas estarão disponíveis assim que o pagamento for confirmado', 10000)
+      navigationStore.goToOrder(data.order_uid)
     })
     .catch(() => {})
 }

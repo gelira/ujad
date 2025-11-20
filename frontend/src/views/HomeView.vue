@@ -1,39 +1,35 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { RouterView } from 'vue-router'
+import { watch } from 'vue';
+import { RouterView, useRoute } from 'vue-router';
 
-import { useAuthStore } from '@/stores/auth'
-import { useNavigationStore } from '@/stores/navigation'
-import { removeToken } from '@/utils/localStorage'
-import AppBar from '@/components/AppBar.vue'
-import { ROUTES } from '@/router'
+import AppBar from '@/components/AppBar.vue';
+import UserNameDialog from '@/components/UserNameDialog.vue';
+import { ROUTES } from '@/router';
+import { useAuthStore } from '@/stores/auth';
+import { useNavigationStore } from '@/stores/navigation';
 
+const route = useRoute()
 const authStore = useAuthStore()
 const navigationStore = useNavigationStore()
 
-onMounted(() => {
-  authStore.getUserInfo()
-    .then(() => {
-      const routeName = navigationStore.activeRoute?.name
+watch(
+  () => [route.name, authStore.user.role],
+  ([routeName, role]) => {
+    if (routeName !== ROUTES.HOME.name) {
+      return
+    }
 
-      if (
-        routeName === ROUTES.HOME.name ||
-        routeName === ROUTES.CONSUME.name
-      ) {
-        authStore.user.role === 'consumer'
-          ? navigationStore.goToTickets()
-          : navigationStore.goToConsume()
-      }
-    })
-    .catch(() => {
-      removeToken()
-      navigationStore.goToLogin()
-    })
-})
+    role === 'consumer'
+      ? navigationStore.goToTickets()
+      : navigationStore.goToConsume()
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
   <AppBar />
+  <UserNameDialog />
   <v-container class="mt-16">
     <RouterView />
   </v-container>
